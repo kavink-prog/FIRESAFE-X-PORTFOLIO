@@ -1,0 +1,219 @@
+image: atlassian/default-image:4
+
+definitions:
+  services:
+    docker:
+      memory: 3072
+  caches:
+    sonar: ~/.sonar/cache
+    node: node_modules
+    docker-cache: /var/lib/docker 
+  steps:
+    - step: &sonar_scan
+        caches:
+          - sonar
+        name: Sonar Scanner
+        image: 
+          name: 010928215705.dkr.ecr.ap-south-1.amazonaws.com/mako-ecr-pipeline-staging
+          aws:
+            oidc-role: $AWS_SONAR_ROLE_ARN
+        oidc: true
+        script:
+          - export AWS_ROLE_ARN=$AWS_SONAR_ROLE_ARN
+          - unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN && export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token && echo $BITBUCKET_STEP_OIDC_TOKEN > $AWS_WEB_IDENTITY_TOKEN_FILE          
+          - export RUNNER_IP=$(curl -s ifconfig.me)
+          - |
+            RULE_EXISTS=$(aws ec2 describe-security-groups \
+              --group-ids "${SECURITY_GROUP_ID}" \
+              --query "SecurityGroups[0].IpPermissions[?FromPort==\`${SONAR_PORT}\` && ToPort==\`${SONAR_PORT}\` && IpRanges[?CidrIp=='${RUNNER_IP}/32']]" \
+              --output text)
+
+            if [ -z "$RULE_EXISTS" ]; then
+              aws ec2 authorize-security-group-ingress \
+                --group-id "${SECURITY_GROUP_ID}" \
+                --protocol tcp \
+                --port "${SONAR_PORT}" \
+                --cidr "${RUNNER_IP}/32"
+            fi
+          - sonar-scanner -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN
+          - aws ec2 revoke-security-group-ingress --group-id ${SECURITY_GROUP_ID} --protocol tcp --port $SONAR_PORT --cidr ${RUNNER_IP}/32
+          
+    - step: &secret_scan
+        name: Secret Scan
+        script:
+          - set -e  # Exit on error
+          - pipe: atlassian/git-secrets-scan:3.2.0
+            variables:
+              DEBUG: "true"
+
+    - step: &generate_sbom
+        name: Generate SBOM (Source Code) and Upload to S3
+        image: theoptimizers/devsecops:v1
+        oidc: true
+        script:
+          - |
+            set -euo pipefail && \
+            echo "🔐 Configure AWS OIDC" && \
+            export AWS_REGION=$AWS_DEFAULT_REGION && \
+            export AWS_ROLE_ARN=$AWS_SBOM_ROLE_ARN && \
+            export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token && \
+            echo "$BITBUCKET_STEP_OIDC_TOKEN" > "$AWS_WEB_IDENTITY_TOKEN_FILE"
+
+            echo "🧾 Using current repository: $BITBUCKET_REPO_SLUG"
+            REPO_DIR="$BITBUCKET_REPO_SLUG"
+
+
+          - set -euo pipefail
+          - echo "🧾 Generating SBOM"
+          - SAFE_BRANCH=$(echo "$BITBUCKET_BRANCH" | tr '/' '-' )
+          - SBOM_FILE="sbom-${REPO_DIR}-${SAFE_BRANCH}-${BITBUCKET_BUILD_NUMBER}.json"
+          - SBOM_TXT="sbom-${REPO_DIR}-${SAFE_BRANCH}-${BITBUCKET_BUILD_NUMBER}.txt"
+
+          - syft . -o cyclonedx-json > "$SBOM_FILE"
+          - syft . -o table > "$SBOM_TXT"
+          - syft . -o table
+          - cp "$SBOM_FILE" ..
+          - cp "$SBOM_TXT" ..
+
+          - echo "☁️ Uploading SBOM to S3"
+          - aws s3 cp "$SBOM_FILE" "s3://$TRIVY_S3_BUCKET/sboms/$REPO_DIR/$SBOM_FILE"
+          - aws s3 cp "$SBOM_TXT" "s3://$TRIVY_S3_BUCKET/sboms/$REPO_DIR/$SBOM_TXT"
+
+
+        artifacts:
+          - "**/sbom-*.json"
+          - "**/sbom-*.txt"
+
+    - step: &grype_sbom_scan
+        name: Grype Vulnerability Scan and Upload
+        image: theoptimizers/devsecops:v1
+        oidc: true
+        script:
+          - |
+            set -euo pipefail
+
+            echo "🔐 Configure AWS OIDC"
+            export AWS_REGION="$AWS_DEFAULT_REGION"
+            export AWS_ROLE_ARN="$AWS_SBOM_ROLE_ARN"
+            export AWS_WEB_IDENTITY_TOKEN_FILE="$(pwd)/web-identity-token"
+            echo "$BITBUCKET_STEP_OIDC_TOKEN" > "$AWS_WEB_IDENTITY_TOKEN_FILE"
+
+          - |
+            echo "🧾 Preparing filenames"
+
+            REPO_DIR="$BITBUCKET_REPO_SLUG"
+            SAFE_BRANCH=$(echo "$BITBUCKET_BRANCH" | sed 's#[^a-zA-Z0-9._-]#-#g')
+
+            SBOM_FILE="sbom-${REPO_DIR}-${SAFE_BRANCH}-${BITBUCKET_BUILD_NUMBER}.json"
+
+            GRYPE_JSON="grype-${REPO_DIR}-${SAFE_BRANCH}-${BITBUCKET_BUILD_NUMBER}.json"
+            GRYPE_TXT="grype-${REPO_DIR}-${SAFE_BRANCH}-${BITBUCKET_BUILD_NUMBER}.txt"
+
+            echo "🛡️ Running Grype Scan"
+
+            # JSON report
+          - grype "$SBOM_FILE" -o json > "$GRYPE_JSON"
+
+            # TXT (table) report
+          - grype "$SBOM_FILE" -o table > "$GRYPE_TXT" || true
+          - grype "$SBOM_FILE" -o table
+
+          - |
+            echo "📦 Installing jq (Debian Bookworm Slim)"
+            apt-get update -y
+            apt-get install -y jq
+
+          - |
+            echo "🔎 Checking EPSS policy"
+
+            CRITICAL_HIGH_EPSS_COUNT=$(jq '
+              [
+                .matches[]
+                | select(
+                    .vulnerability.severity == "Critical"
+                    and ((.vulnerability.epss[0].epss // 0) >= 0.70)
+                  )
+              ] | length
+            ' "$GRYPE_JSON")
+
+            echo "🔴 Critical vulnerabilities with EPSS ≥ 70%: $CRITICAL_HIGH_EPSS_COUNT"
+
+            if [ "$CRITICAL_HIGH_EPSS_COUNT" -gt 3 ]; then
+              echo "❌ Policy violation: More than 3 Critical vulnerabilities with EPSS ≥ 70%"
+              exit 1
+            fi
+
+            echo "✅ Vulnerability policy passed"
+
+          - |
+            echo "☁️ Uploading Grype reports to S3"
+
+            aws s3 cp "$GRYPE_JSON" \
+              "s3://$TRIVY_S3_BUCKET/grype/$REPO_DIR/$GRYPE_JSON"
+
+            aws s3 cp "$GRYPE_TXT" \
+              "s3://$TRIVY_S3_BUCKET/grype/$REPO_DIR/$GRYPE_TXT"
+
+        artifacts:
+          - "**/grype-*.json"
+          - "**/grype-*.txt"  
+
+    - step: &validate_node
+        name: Validate Dependency Versions
+        image: node:18
+        script:
+          - node validate-deps.js
+
+    - step: &publish_app_versions
+        name: Publish Package Versions
+        image: theoptimizers/devsecops:v1
+        oidc: true
+        script:
+          - export AWS_REGION=$AWS_DEFAULT_REGION
+          - export AWS_ROLE_ARN=$AWS_SBOM_ROLE_ARN
+          - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token
+          - echo "$BITBUCKET_STEP_OIDC_TOKEN" > "$AWS_WEB_IDENTITY_TOKEN_FILE"
+          - chmod +x publish_versions.sh
+          - ./publish_versions.sh
+
+    - step: &deploy_to_s3
+        caches:
+          - node
+        name: Deploy to S3 Bucket
+        image:
+          name: 010928215705.dkr.ecr.ap-south-1.amazonaws.com/mako-ecr-pipeline-staging:v4
+          aws:
+            oidc-role: $AWS_S3_OIDC_ROLE_ARN
+        oidc: true
+        script:
+          - export AWS_ROLE_ARN=$AWS_S3_OIDC_ROLE_ARN
+          - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token
+          - echo $BITBUCKET_STEP_OIDC_TOKEN > $AWS_WEB_IDENTITY_TOKEN_FILE
+          - npm install
+          - npm run build
+
+          - aws s3 sync dist/. "$S3_BUCKET" --region "$AWS_DEFAULT_REGION"
+          - aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "/*"
+        after-script:
+          - chmod +x ./notify.sh && MESSAGE=$(./notify.sh "Deploy to S3" "dev")
+          - |
+            curl -s -X POST -H 'Content-type: application/json' --data '{
+              "text": "'"$MESSAGE"'"
+            }' "$WEBHOOK_URL"
+
+
+pipelines:
+  branches:
+    feat/pipeline:
+      - parallel:
+          - step: *sonar_scan
+          - step: *secret_scan
+      - step: *validate_node
+      - step:
+          <<: *generate_sbom
+          artifacts:
+            - sbom-*.json
+            - sbom-*.txt
+      - step: *grype_sbom_scan
+      - step: *publish_app_versions
+      - step: *deploy_to_s3
