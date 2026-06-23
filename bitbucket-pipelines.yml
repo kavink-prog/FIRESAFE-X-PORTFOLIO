@@ -195,7 +195,7 @@ definitions:
           - aws s3 sync dist/. "$S3_BUCKET" --region "$AWS_DEFAULT_REGION"
           - aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "/*"
         after-script:
-          - chmod +x ./notify.sh && MESSAGE=$(./notify.sh "Deploy to S3" "dev")
+          - chmod +x ./notify.sh && MESSAGE=$(./notify.sh "Deploy to S3" "prod")
           - |
             curl -s -X POST -H 'Content-type: application/json' --data '{
               "text": "'"$MESSAGE"'"
