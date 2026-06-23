@@ -192,7 +192,7 @@ definitions:
           - npm install
           - npm run build
 
-          - aws s3 sync out/. "$S3_BUCKET" --region "$AWS_DEFAULT_REGION"
+          - aws s3 sync out/. "s3://$S3_BUCKET" --region "$AWS_DEFAULT_REGION"
           - aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "/*"
         after-script:
           - chmod +x ./notify.sh && MESSAGE=$(./notify.sh "Deploy to S3" "prod")
