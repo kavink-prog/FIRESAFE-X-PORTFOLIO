@@ -204,7 +204,7 @@ definitions:
 
 pipelines:
   branches:
-    feat/pipeline-v2:
+    develop:
       - parallel:
           - step: *sonar_scan
           - step: *secret_scan
