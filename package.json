@@ -18,5 +18,8 @@
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "three": "0.160.0"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.2"
   }
 }
