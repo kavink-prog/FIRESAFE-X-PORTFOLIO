@@ -181,8 +181,21 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-.nav__brand span { color: var(--fire-2); }
+.nav__logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border-radius: 8px;
+  mix-blend-mode: lighten;
+  filter: brightness(1.05);
+  flex-shrink: 0;
+}
+.nav__brand-text { display: flex; align-items: center; gap: 0; }
+.nav__brand-x { color: var(--fire-2); }
 .nav__links {
   display: flex;
   gap: 12px;

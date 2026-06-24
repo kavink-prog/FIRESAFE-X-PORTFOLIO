@@ -1,8 +1,20 @@
+import Image from 'next/image';
+
 export default function Nav() {
   return (
     <header className="nav">
       <div className="nav__inner">
-        <a href="#top" className="nav__brand">FireSafe<span>X</span></a>
+        <a href="#top" className="nav__brand">
+          <Image
+            src="/icons/apple-touch-icon.png"
+            alt="FireSafeX"
+            width={36}
+            height={36}
+            className="nav__logo"
+            priority
+          />
+          <span className="nav__brand-text">FireSafe<span className="nav__brand-x">X</span></span>
+        </a>
         <nav className="nav__links">
           <a href="#overview">Overview</a>
           <a href="#problem">Problem</a>
