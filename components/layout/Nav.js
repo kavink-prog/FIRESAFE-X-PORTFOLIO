@@ -1,17 +1,22 @@
-import Image from 'next/image';
+import Image from "next/image";
+
+
+import appleTouchIcon from "../../public/icons/apple-touch-icon.png";
 
 export default function Nav() {
   return (
     <header className="nav">
       <div className="nav__inner">
         <a href="#top" className="nav__brand">
+          {/* Plain img tag — next/image is incompatible with output:'export'
+              for small local icons. The file is served directly from /icons/. */}
           <Image
-            src="/icons/apple-touch-icon.png"
+            src={appleTouchIcon}
             alt="FireSafeX"
             width={36}
             height={36}
             className="nav__logo"
-            priority
+            loading="eager"
           />
           <span className="nav__brand-text">FireSafe<span className="nav__brand-x">X</span></span>
         </a>

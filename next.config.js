@@ -7,45 +7,17 @@ const nextConfig = {
   output: 'export',
   trailingSlash: true,
 
-  // Long-lived immutable cache for all static sequence frames, videos, and
-  // other versioned assets so returning visitors pay zero re-download cost.
-  async headers() {
-    return [
-      {
-        source: '/assets/sequences/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-      {
-        source: '/assets/videos/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=86400',
-          },
-          // Allow partial content requests so video can stream without
-          // downloading the entire file first.
-          {
-            key: 'Accept-Ranges',
-            value: 'bytes',
-          },
-        ],
-      },
-      {
-        source: '/assets/images/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-    ];
+  // Static export disables the built-in image optimization API.
+  // Setting unoptimized:true makes next/image behave like a plain <img>
+  // tag (serves the original file directly), which is required for
+  // output:'export' to work without a custom loader.
+  images: {
+    unoptimized: true,
   },
+
+  // NOTE: headers() is not supported with output:'export'.
+  // Cache-Control headers must be configured at the CDN/hosting layer
+  // (e.g. Bitbucket Pipelines → S3/CloudFront, or Vercel edge config).
 };
 
 export default nextConfig;
