@@ -5,7 +5,7 @@ export default function Workflow() {
         <p className="eyebrow reveal">How it works</p>
         <h2 className="title reveal">Train. Practice.<br/><span className="red">Assess. Certify.</span></h2>
 
-        <div className="steps">
+        <div className="steps steps--four">
           <div className="step reveal">
             <div className="step__visual">
               <svg className="step__icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -17,7 +17,7 @@ export default function Workflow() {
             </div>
             <div className="step__num">1</div>
             <h4>Train</h4>
-            <p>Start with theory learning, onboarding, and AI-led guidance. Meta Quest maps the room while the smart extinguisher pairs instantly for practical readiness.</p>
+            <p>Build foundational knowledge through theory learning, onboarding, and AI-supported safety guidance.</p>
           </div>
           <div className="step reveal">
             <div className="step__visual">
@@ -29,7 +29,7 @@ export default function Workflow() {
             </div>
             <div className="step__num">2</div>
             <h4>Practice</h4>
-            <p>Users respond to mixed reality fire scenarios with a real extinguisher body, building muscle memory through pull, aim, squeeze, and sweep actions.</p>
+            <p>Respond to mixed reality fire scenarios with a physical extinguisher training device and repeat key actions.</p>
           </div>
           <div className="step reveal">
             <div className="step__visual">
@@ -42,8 +42,19 @@ export default function Workflow() {
               <span className="step__pulse step__pulse--success"></span>
             </div>
             <div className="step__num">3</div>
-            <h4>Assess &amp; certify</h4>
-            <p>FireSafeX scores technique, tracks completion, and generates digital records so organizations can assess competency and certify progress with clarity.</p>
+            <h4>Assess</h4>
+            <p>Review captured actions, session feedback, and performance results to understand practical competency.</p>
+          </div>
+          <div className="step reveal">
+            <div className="step__visual">
+              <svg className="step__icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 10h28v44H18z"/><path d="M25 28l5 5 10-11"/><path d="M25 42h14"/>
+              </svg>
+              <span className="step__pulse step__pulse--success"></span>
+            </div>
+            <div className="step__num">4</div>
+            <h4>Certify</h4>
+            <p>Maintain digital completion records and support structured certification workflows across the training program.</p>
           </div>
         </div>
       </div>

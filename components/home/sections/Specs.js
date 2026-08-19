@@ -1,9 +1,9 @@
 export default function Specs() {
   return (
-    <section id="specs" className="specs">
+    <section id="ecosystem" className="specs">
       <div className="specs__inner">
-        <p className="eyebrow reveal">What's inside</p>
-        <h2 className="title reveal">A complete fire safety training platform,<br/><span className="grad">explained clearly.</span></h2>
+        <p className="eyebrow reveal">Connected ecosystem</p>
+        <h2 className="title reveal">Every part of the training experience,<br/><span className="grad">working together.</span></h2>
         <p className="big reveal center specs__intro">FireSafeX combines theory learning, practical MR training, AI safety guidance, real-time assessment, certification records, and enterprise controls in one connected ecosystem.</p>
 
         <div className="specs__grid">
@@ -14,13 +14,13 @@ export default function Specs() {
           </article>
           <article className="spec-card reveal">
             <div className="spec-card__icon" aria-hidden="true">BT</div>
-            <h5>Bluetooth connectivity</h5>
-            <p>The smart extinguisher pairs wirelessly with the headset and surrounding system, keeping deployment fast and movement cable-free.</p>
+            <h5>Device connectivity</h5>
+            <p>The smart training device connects with the digital experience so physical actions can contribute to the session workflow.</p>
           </article>
           <article className="spec-card reveal">
             <div className="spec-card__icon" aria-hidden="true">SD</div>
             <h5>Smart extinguisher integration</h5>
-            <p>The device senses pin pull, aim, squeeze, and sweep actions so practical training feels close to using a real extinguisher.</p>
+            <p>The device supports physical handling and captures key pull, aim, squeeze, and sweep actions during training.</p>
           </article>
           <article className="spec-card reveal">
             <div className="spec-card__icon" aria-hidden="true">APP</div>
@@ -45,12 +45,12 @@ export default function Specs() {
           <article className="spec-card reveal">
             <div className="spec-card__icon" aria-hidden="true">DX</div>
             <h5>Certification &amp; records</h5>
-            <p>Competency-based digital certification and structured records support reviews, compliance workflows, and enterprise follow-up.</p>
+            <p>Digital certification workflows and structured records support training reviews and enterprise follow-up.</p>
           </article>
           <article className="spec-card reveal">
             <div className="spec-card__icon" aria-hidden="true">UX</div>
             <h5>Enterprise readiness</h5>
-            <p>Offline operation, multilingual support, compliance-focused workflows, and admin controls make the platform ready for global organizations.</p>
+            <p>Multilingual support, role-based training, and admin controls help organizations coordinate programs across teams and locations.</p>
           </article>
         </div>
       </div>

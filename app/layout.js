@@ -8,9 +8,30 @@ const montserrat = Montserrat({
 });
 
 export const metadata = {
-  title: 'FireSafeX | AI-Powered Fire Safety Training Ecosystem',
+  metadataBase: new URL('https://firesafex.ai'),
+  title: 'AI-Powered Fire Safety Training | FireSafeX',
   description:
-    'FireSafeX is the next-generation AI-powered fire safety training ecosystem for train, practice, assess, and certify workflows across industries, languages, regions, and enterprise environments.',
+    'FireSafeX combines a smart extinguisher, mixed reality practice, AI safety guidance, practical assessment, digital records, and enterprise fire safety training management.',
+  keywords: [
+    'AI-powered fire safety training',
+    'mixed reality fire safety training',
+    'fire extinguisher training system',
+    'practical fire safety assessment',
+    'enterprise fire safety training',
+  ],
+  alternates: { canonical: '/' },
+  openGraph: {
+    type: 'website',
+    url: 'https://firesafex.ai/',
+    siteName: 'FireSafeX',
+    title: 'AI-Powered Fire Safety Training | FireSafeX',
+    description: 'Real equipment, mixed reality practice, intelligent guidance, and measurable fire safety training performance in one connected ecosystem.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'AI-Powered Fire Safety Training | FireSafeX',
+    description: 'Train the response. Measure the skill. Build readiness with FireSafeX.',
+  },
   icons: {
     icon: [
       { url: '/icons/favicon-16x16.png', sizes: '16x16', type: 'image/png' },

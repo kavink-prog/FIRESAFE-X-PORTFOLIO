@@ -1,43 +1,63 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
+import { useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
+import useAutoRotatingTabs from '@/components/hooks/useAutoRotatingTabs';
 
 const FEATURES = [
   {
     title: 'Multi-Language AI Instructor',
+    shortLabel: 'Language',
+    kicker: 'Accessible AI guidance',
     description:
       'Train users in their preferred language through AI-powered theory lessons, voice interactions, and expert guidance. Create a more accessible and engaging learning experience for global teams.',
     icon: 'globe',
+    highlights: ['Preferred language', 'Voice guidance', 'Accessible instruction'],
   },
   {
-    title: 'Region-Based Content',
+    title: 'Regional Training Content',
+    shortLabel: 'Region',
+    kicker: 'Context-aware delivery',
     description:
-      'Adapt training content, simulations, and safety procedures to regional regulations, standards, and operational requirements without rebuilding the platform.',
+      'Organize training experiences for different regions, operating contexts, and organizational requirements.',
     icon: 'map',
+    highlights: ['Regional scenarios', 'Local context', 'Consistent delivery'],
   },
   {
     title: 'Role-Based Training',
+    shortLabel: 'Roles',
+    kicker: 'The right experience for each user',
     description:
       'Deliver customized learning experiences for employees, safety officers, supervisors, instructors, and administrators with configurable access and training paths.',
     icon: 'roles',
+    highlights: ['Employees', 'Instructors', 'Administrators'],
   },
   {
-    title: 'Multiple AI Personas',
+    title: 'Centralized Administration',
+    shortLabel: 'Administration',
+    kicker: 'One management layer',
     description:
-      'Choose from customizable AI instructors and 3D trainer avatars to create organization-specific learning experiences.',
-    icon: 'personas',
-  },
-  {
-    title: 'Admin-Controlled Experience',
-    description:
-      'Control session duration, assessments, permissions, content visibility, and training workflows through a centralized management system.',
+      'Coordinate users, training access, records, and program settings through a central management layer.',
     icon: 'control',
+    highlights: ['Users', 'Records', 'Program settings'],
+  },
+  {
+    title: 'Configurable Training Workflows',
+    shortLabel: 'Workflows',
+    kicker: 'Programs shaped around operations',
+    description:
+      'Configure supported sessions, assessments, permissions, and content visibility around program needs.',
+    icon: 'control',
+    highlights: ['Sessions', 'Assessments', 'Permissions'],
   },
   {
     title: 'Enterprise Customization',
+    shortLabel: 'Customization',
+    kicker: 'Deployment fit without fragmentation',
     description:
-      "Customize branding, workflows, compliance requirements, and training objectives to match your organization's needs.",
+      "Adapt supported branding, workflows, and training objectives to match the organization's deployment needs.",
     icon: 'modular',
+    highlights: ['Branding', 'Objectives', 'Deployment fit'],
   },
 ];
 
@@ -46,14 +66,6 @@ const COORDINATES = [
   'EU 48.8566 / 2.3522',
   'MEA 25.2048 / 55.2708',
   'APAC 1.3521 / 103.8198',
-];
-
-const NODES = [
-  { top: '12%', left: '14%', delay: 0 },
-  { top: '20%', right: '12%', delay: 1.2 },
-  { top: '54%', left: '8%', delay: 2.3 },
-  { bottom: '18%', right: '16%', delay: 3.1 },
-  { bottom: '10%', left: '28%', delay: 4.2 },
 ];
 
 function Icon({ type }) {
@@ -112,37 +124,52 @@ function Icon({ type }) {
   }
 }
 
-function FeatureCard({ feature, index }) {
-  return (
-    <motion.article
-      className="stats__feature-card"
-      initial={{ opacity: 0, y: 36, scale: 0.96, filter: 'blur(10px)' }}
-      whileInView={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-      viewport={{ once: true, amount: 0.24 }}
-      transition={{ duration: 0.72, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
-      onMouseMove={(event) => {
-        const rect = event.currentTarget.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        event.currentTarget.style.setProperty('--mx', `${x}px`);
-        event.currentTarget.style.setProperty('--my', `${y}px`);
-      }}
-    >
-      <div className="stats__feature-icon">
-        <Icon type={feature.icon} />
-      </div>
-      <h3>{feature.title}</h3>
-      <p>{feature.description}</p>
-      <span className="stats__feature-sheen" aria-hidden="true"></span>
-    </motion.article>
-  );
-}
-
 export default function Stats() {
-  const shouldReduceMotion = useReducedMotion();
+  const tabListRef = useRef(null);
+  const {
+    activeIndex,
+    selectIndex,
+    containerRef,
+    interactionProps,
+    isPaused,
+    isUserPaused,
+    prefersReducedMotion,
+    toggleUserPause,
+    progressKey,
+  } = useAutoRotatingTabs({ count: FEATURES.length, intervalMs: 5000 });
+  const active = FEATURES[activeIndex];
+
+  useEffect(() => {
+    if (window.innerWidth > 640) return;
+    const list = tabListRef.current;
+    const tab = list?.querySelectorAll('[role="tab"]')[activeIndex];
+    if (!list || !tab) return;
+    list.scrollTo({
+      left: Math.max(0, tab.offsetLeft - (list.clientWidth - tab.clientWidth) / 2),
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+    });
+  }, [activeIndex, prefersReducedMotion]);
+
+  const handleTabKeyDown = (event, index) => {
+    const keyTargets = {
+      ArrowRight: index + 1,
+      ArrowDown: index + 1,
+      ArrowLeft: index - 1,
+      ArrowUp: index - 1,
+      Home: 0,
+      End: FEATURES.length - 1,
+    };
+    if (!(event.key in keyTargets)) return;
+    event.preventDefault();
+    const nextIndex = ((keyTargets[event.key] % FEATURES.length) + FEATURES.length) % FEATURES.length;
+    selectIndex(nextIndex);
+    window.requestAnimationFrame(() => {
+      tabListRef.current?.querySelectorAll('[role="tab"]')[nextIndex]?.focus();
+    });
+  };
 
   return (
-    <section id="analytics" className="stats stats--global">
+    <section id="global-readiness" className="stats stats--global">
       <div className="stats__bg" aria-hidden="true">
         <div className="stats__gridlines"></div>
         <div className="stats__scanlines"></div>
@@ -172,111 +199,96 @@ export default function Stats() {
           viewport={{ once: true, amount: 0.45 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
         >
-          <span className="stats__eyebrow-pill">Global Deployment Ready</span>
+          <span className="stats__eyebrow-pill">Enterprise and global readiness</span>
           <h2 className="stats__title-global">
-            AI-Powered Fire Safety Training.
+            One training ecosystem.
             <br />
-            Adapted to Every Language, Region, and Role.
+            Adapted by language, region, and role.
           </h2>
           <p className="stats__lede stats__lede--global">
-            FireSafeX is built for organizations operating across multiple countries, languages, industries, and
-            compliance frameworks. Deliver localized fire-safety training experiences with multilingual AI guidance,
-            region-specific safety content, and customizable training workflows for every type of user.
+            FireSafeX supports organizations operating across teams, locations, languages, and industries. Coordinate
+            multilingual guidance, regional content, role-based training, and centralized program administration.
           </p>
         </motion.div>
 
-        <div className="stats__stage-wrap">
-          <motion.div
-            className="stats__stage"
-            initial={{ opacity: 0, scale: 0.9, y: 36 }}
-            whileInView={{ opacity: 1, scale: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.95, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <div className="stats__stage-glow"></div>
-            <div className="stats__stage-rings">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-            <div className="stats__stage-beams">
-              <span></span>
-              <span></span>
-            </div>
-            <div className="stats__stage-nodes">
-              {NODES.map((node, index) => (
-                <span key={index} style={{ ...node, '--delay': node.delay }}></span>
+        <div
+          ref={containerRef}
+          className="stats__experience"
+          data-rotation-paused={isPaused}
+          {...interactionProps}
+        >
+          <div className="stats__capability-nav">
+            <div ref={tabListRef} className="stats__capability-tabs" role="tablist" aria-label="Global readiness capabilities">
+              {FEATURES.map((feature, index) => (
+                <button
+                  key={feature.title}
+                  type="button"
+                  role="tab"
+                  tabIndex={activeIndex === index ? 0 : -1}
+                  id={`global-tab-${index}`}
+                  aria-controls="global-panel"
+                  aria-selected={activeIndex === index}
+                  className={`stats__capability-tab ${activeIndex === index ? 'is-active' : ''}`}
+                  onClick={() => selectIndex(index)}
+                  onKeyDown={(event) => handleTabKeyDown(event, index)}
+                >
+                  <span>{String(index + 1).padStart(2, '0')}</span>
+                  <strong>{feature.shortLabel}</strong>
+                  {activeIndex === index ? <i key={progressKey} aria-hidden="true"></i> : null}
+                </button>
               ))}
             </div>
-            <div className="stats__stage-panel">
-              <motion.video
+            {!prefersReducedMotion ? (
+              <button
+                type="button"
+                className="stats__rotation-toggle"
+                aria-label={isUserPaused ? 'Resume automatic global readiness tabs' : 'Pause automatic global readiness tabs'}
+                aria-pressed={isUserPaused}
+                onClick={toggleUserPause}
+              >
+                <span aria-hidden="true">{isUserPaused ? '▶' : 'Ⅱ'}</span>
+              </button>
+            ) : null}
+          </div>
+
+          <motion.article
+            key={active.title}
+            id="global-panel"
+            role="tabpanel"
+            tabIndex={0}
+            aria-labelledby={`global-tab-${activeIndex}`}
+            className="stats__capability-panel"
+            initial={{ opacity: 0, y: 18, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.55, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div className="stats__capability-media">
+              <video
                 className="stats__stage-video"
                 src="/assets/videos/global/firesafex-product-video-training.mp4"
-                autoPlay
+                autoPlay={!prefersReducedMotion}
                 muted
                 loop
                 playsInline
                 preload="metadata"
-                initial={shouldReduceMotion ? false : { scale: 1.04 }}
-                whileInView={shouldReduceMotion ? {} : { scale: 1 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 1.2, ease: 'easeOut' }}
+                aria-hidden="true"
               />
+              <div className="stats__capability-media-overlay" aria-hidden="true">
+                <span><i></i> Global training network</span>
+                <strong>{active.shortLabel}</strong>
+              </div>
             </div>
-          </motion.div>
 
-          <svg className="stats__connections" viewBox="0 0 1200 740" aria-hidden="true">
-            <defs>
-              <linearGradient id="statsConnection" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="rgba(106,239,255,0)" />
-                <stop offset="0.52" stopColor="rgba(106,239,255,0.95)" />
-                <stop offset="1" stopColor="rgba(62,126,255,0)" />
-              </linearGradient>
-            </defs>
-            <motion.path
-              d="M600 325C484 282 370 242 246 170"
-              initial={{ pathLength: 0, opacity: 0 }}
-              whileInView={{ pathLength: 1, opacity: 0.85 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 1.1, delay: 0.2 }}
-            />
-            <motion.path
-              d="M600 325C700 250 846 196 1002 188"
-              initial={{ pathLength: 0, opacity: 0 }}
-              whileInView={{ pathLength: 1, opacity: 0.85 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 1.1, delay: 0.34 }}
-            />
-            <motion.path
-              d="M600 325C504 420 382 522 260 596"
-              initial={{ pathLength: 0, opacity: 0 }}
-              whileInView={{ pathLength: 1, opacity: 0.85 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 1.1, delay: 0.48 }}
-            />
-            <motion.path
-              d="M600 325C704 414 838 506 988 566"
-              initial={{ pathLength: 0, opacity: 0 }}
-              whileInView={{ pathLength: 1, opacity: 0.85 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 1.1, delay: 0.62 }}
-            />
-            <motion.circle
-              cx="600"
-              cy="325"
-              r="5"
-              initial={{ opacity: 0, scale: 0.6 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            />
-          </svg>
-        </div>
-
-        <div className="stats__grid stats__grid--global">
-          {FEATURES.map((feature, index) => (
-            <FeatureCard key={feature.title} feature={feature} index={index} />
-          ))}
+            <div className="stats__capability-copy">
+              <div className="stats__capability-icon"><Icon type={active.icon} /></div>
+              <span className="stats__capability-kicker">{active.kicker}</span>
+              <h3>{active.title}</h3>
+              <p>{active.description}</p>
+              <div className="stats__capability-highlights">
+                {active.highlights.map((highlight) => <span key={highlight}>{highlight}</span>)}
+              </div>
+            </div>
+          </motion.article>
         </div>
       </div>
     </section>

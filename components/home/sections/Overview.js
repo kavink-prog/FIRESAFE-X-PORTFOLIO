@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import useAutoRotatingTabs from '@/components/hooks/useAutoRotatingTabs';
 import VIDEO_URLS from '@/data/video-urls.json';
 
 const v = (path) => VIDEO_URLS[path] || path;
@@ -8,8 +9,8 @@ const v = (path) => VIDEO_URLS[path] || path;
 const TABS = [
   {
     id: 'smart-hardware',
-    label: 'Smart Hardware',
-    eyebrow: 'Real extinguisher shell',
+    label: 'Smart Extinguisher',
+    eyebrow: 'Connected physical training',
     title: (
       <>
         Smart extinguisher.
@@ -18,21 +19,21 @@ const TABS = [
       </>
     ),
     copy:
-      'Transform any fire extinguisher into a smart training device with embedded sensing, haptic feedback, and live telemetry that makes every response action realistic and measurable.',
+      'Use a connected physical extinguisher training device to practise handling and capture key response actions during guided sessions.',
     accent: 'cyan',
     mediaType: 'video',
     mediaSrc: v('/assets/videos/overview/smart-hardware.mp4'),
-    hud: ['Live sensors', 'Force capture', 'Haptic feedback'],
+    hud: ['Connected device', 'Action capture', 'Practical handling'],
     details: [
-      { label: 'Shell', value: 'Real physical extinguisher body' },
-      { label: 'Tracking', value: 'Pin, squeeze, angle, and motion' },
-      { label: 'Capture', value: 'Real-time performance feedback' },
+      { label: 'Interaction', value: 'Physical extinguisher handling' },
+      { label: 'Tracking', value: 'Key response actions' },
+      { label: 'Output', value: 'Performance feedback' },
     ],
   },
   {
     id: 'mixed-reality',
     label: 'Mixed Reality',
-    eyebrow: 'Passthrough scenario engine',
+    eyebrow: 'Immersive practical scenarios',
     title: (
       <>
         Practical MR training.
@@ -41,36 +42,36 @@ const TABS = [
       </>
     ),
     copy:
-      'Immersive mixed reality simulations place physics-driven fire scenarios inside the user’s real environment, enabling repeatable response practice without live burn risk, waste, or cleanup.',
+      'Mixed reality simulations place fire response scenarios in the trainee’s surrounding environment, enabling repeatable practical sessions without staging a live fire.',
     accent: 'blue',
     mediaType: 'video',
     mediaSrc: v('/assets/videos/overview/mixed-reality.mp4'),
-    hud: ['Meta Quest passthrough', 'Scenario depth map', 'Room-aware guidance'],
+    hud: ['Mixed reality', 'Scenario practice', 'Guided response'],
     details: [
-      { label: 'Coverage', value: 'Office, plant, warehouse, field' },
-      { label: 'Mode', value: 'Mixed reality passthrough' },
+      { label: 'Use', value: 'Workplace training scenarios' },
+      { label: 'Mode', value: 'Mixed reality practice' },
       { label: 'Outcome', value: 'Repeatable practical training' },
     ],
   },
   {
     id: 'ai-expert',
     label: 'AI Expert',
-    eyebrow: 'AI instructor sequence',
+    eyebrow: 'Intelligent safety guidance',
     title: (
       <>
         AI safety expert.
         <br />
-        <span className="grad">Always available to guide.</span>
+        <span className="grad">Guidance in the flow of learning.</span>
       </>
     ),
     copy:
-      'Ask questions, deliver theory learning, and guide trainees through every session with an AI-powered safety trainer built to make learning more accessible, responsive, and engaging.',
+      'Support theory learning, trainee questions, and guided sessions with an AI safety expert designed for clear, accessible fire safety training.',
     accent: 'cyan',
     mediaType: 'video',
     mediaSrc: v('/assets/videos/overview/ai-instructor.mp4'),
-    hud: ['Holographic presence', 'Context-aware coaching', 'Continuous instructor presence'],
+    hud: ['Theory support', 'Interactive guidance', 'Multilingual learning'],
     details: [
-      { label: 'Experience', value: 'Cinematic holographic instructor' },
+      { label: 'Experience', value: 'Interactive safety guidance' },
       { label: 'Guidance', value: 'Interactive AI safety support' },
       { label: 'Learning', value: 'Theory plus practical coaching' },
     ],
@@ -78,7 +79,7 @@ const TABS = [
   {
     id: 'pass-tracked',
     label: 'P.A.S.S. Tracked',
-    eyebrow: 'Precision movement scoring',
+    eyebrow: 'Practical performance assessment',
     title: (
       <>
         Assess and score.
@@ -87,14 +88,14 @@ const TABS = [
       </>
     ),
     copy:
-      'Every pull, aim, squeeze, and sweep action is tracked in real time, giving instructors detailed feedback, competency scoring, and digital records that support assessment and certification.',
+      'Track key practical actions during a session to provide feedback, performance scoring, and structured training records for assessment and certification workflows.',
     accent: 'cyan',
     mediaType: 'video',
     mediaSrc: v('/assets/videos/overview/pass-tracked.mp4'),
-    hud: ['Target lock', 'Motion analysis', 'Realtime scoring'],
+    hud: ['Action review', 'Performance analysis', 'Real-time feedback'],
     details: [
-      { label: 'Aim', value: 'High-precision motion tracking' },
-      { label: 'Method', value: 'P.A.S.S. sequence verified' },
+      { label: 'Actions', value: 'Pull, aim, squeeze, and sweep' },
+      { label: 'Method', value: 'Practical sequence assessment' },
       { label: 'Output', value: 'Assessment-ready performance data' },
     ],
   },
@@ -103,8 +104,19 @@ const TABS = [
 export default function Overview() {
   const mediaSurfaceRef = useRef(null);
   const activeVideoRef = useRef(null);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const tabListRef = useRef(null);
   const [mediaState, setMediaState] = useState({ loading: true, error: false });
+  const {
+    activeIndex,
+    selectIndex,
+    containerRef,
+    interactionProps,
+    isPaused,
+    isUserPaused,
+    prefersReducedMotion,
+    toggleUserPause,
+    progressKey,
+  } = useAutoRotatingTabs({ count: TABS.length, intervalMs: 5000 });
 
   const activeTab = TABS[activeIndex];
 
@@ -133,6 +145,12 @@ export default function Overview() {
 
     if (video.networkState === HTMLMediaElement.NETWORK_EMPTY || video.readyState === 0) {
       video.load();
+    }
+
+    if (prefersReducedMotion) {
+      video.pause();
+      updateMediaState({ loading: false, error: false });
+      return;
     }
 
     if (!video || video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
@@ -181,7 +199,18 @@ export default function Overview() {
 
   useEffect(() => {
     playActiveVideo();
-  }, [activeIndex]);
+  }, [activeIndex, prefersReducedMotion]);
+
+  useEffect(() => {
+    if (window.innerWidth > 640) return;
+    const list = tabListRef.current;
+    const tab = list?.querySelectorAll('[role="tab"]')[activeIndex];
+    if (!list || !tab) return;
+    list.scrollTo({
+      left: Math.max(0, tab.offsetLeft - (list.clientWidth - tab.clientWidth) / 2),
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+    });
+  }, [activeIndex, prefersReducedMotion]);
 
   useEffect(() => {
     TABS.forEach((tab) => {
@@ -193,7 +222,27 @@ export default function Overview() {
   }, []);
 
   const setOverviewTab = (index) => {
-    setActiveIndex(index);
+    if (index === activeIndex && mediaState.error) playActiveVideo();
+    selectIndex(index);
+  };
+
+  const handleTabKeyDown = (event, index) => {
+    const keyTargets = {
+      ArrowRight: index + 1,
+      ArrowDown: index + 1,
+      ArrowLeft: index - 1,
+      ArrowUp: index - 1,
+      Home: 0,
+      End: TABS.length - 1,
+    };
+    if (!(event.key in keyTargets)) return;
+
+    event.preventDefault();
+    const nextIndex = ((keyTargets[event.key] % TABS.length) + TABS.length) % TABS.length;
+    selectIndex(nextIndex);
+    window.requestAnimationFrame(() => {
+      tabListRef.current?.querySelectorAll('[role="tab"]')[nextIndex]?.focus();
+    });
   };
 
   const handleMixedMove = (event) => {
@@ -218,25 +267,6 @@ export default function Overview() {
     surface.style.setProperty('--overview-parallax-y', '0px');
   };
 
-  const toggleVideoPlayback = () => {
-    const video = activeVideoRef.current;
-    if (!video) return;
-
-    if (video.paused) {
-      configureVideo(video, 'auto');
-      const playPromise = video.play();
-      if (playPromise?.catch) {
-        playPromise.catch((error) => {
-          if (error?.name === 'AbortError') return;
-          updateMediaState({ loading: false, error: true });
-        });
-      }
-      return;
-    }
-
-    video.pause();
-  };
-
   return (
     <section id="overview" className="getknow overview-story">
       <div className="getknow__head overview-story__head">
@@ -252,26 +282,55 @@ export default function Overview() {
         </p>
       </div>
 
-      <div className="overview-story__experience">
+      <div
+        ref={containerRef}
+        className="overview-story__experience"
+        data-rotation-paused={isPaused}
+        {...interactionProps}
+      >
+        <div className="overview-story__navigation reveal">
+          <div
+            ref={tabListRef}
+            className="overview-story__tab-list"
+            role="tablist"
+            aria-label="Product overview"
+          >
+            {TABS.map((tab, index) => (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                tabIndex={activeIndex === index ? 0 : -1}
+                aria-selected={activeIndex === index}
+                aria-controls={`overview-panel-${tab.id}`}
+                id={`overview-tab-${tab.id}`}
+                className={`overview-story__tab ${activeIndex === index ? 'is-active' : ''}`}
+                onClick={() => setOverviewTab(index)}
+                onKeyDown={(event) => handleTabKeyDown(event, index)}
+              >
+                <small>{String(index + 1).padStart(2, '0')}</small>
+                <span>{tab.label}</span>
+                {activeIndex === index ? (
+                  <i key={progressKey} className="overview-story__tab-progress" aria-hidden="true"></i>
+                ) : null}
+              </button>
+            ))}
+          </div>
+          {!prefersReducedMotion ? (
+            <button
+              type="button"
+              className="overview-story__rotation-toggle"
+              aria-label={isUserPaused ? 'Resume automatic product tabs' : 'Pause automatic product tabs'}
+              aria-pressed={isUserPaused}
+              onClick={toggleUserPause}
+            >
+              <span aria-hidden="true">{isUserPaused ? '▶' : 'Ⅱ'}</span>
+            </button>
+          ) : null}
+        </div>
+
         <div className="overview-story__shell">
           <div className="overview-story__content-column">
-            <div className="overview-story__tab-list reveal" role="tablist" aria-label="Product Overview Tabs">
-              {TABS.map((tab, index) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={activeIndex === index}
-                  aria-controls={`overview-panel-${tab.id}`}
-                  id={`overview-tab-${tab.id}`}
-                  className={`overview-story__tab ${activeIndex === index ? 'is-active' : ''}`}
-                  onClick={() => setOverviewTab(index)}
-                >
-                  <span>{tab.label}</span>
-                </button>
-              ))}
-            </div>
-
             <div className="overview-story__content-stack">
               {TABS.map((tab, index) => (
                 <article
@@ -280,6 +339,7 @@ export default function Overview() {
                   role="tabpanel"
                   aria-labelledby={`overview-tab-${tab.id}`}
                   aria-hidden={activeIndex !== index}
+                  tabIndex={activeIndex === index ? 0 : -1}
                   className={`overview-story__content-panel ${activeIndex === index ? 'is-active' : ''}`}
                 >
                   <p className="overview-story__content-eyebrow">{tab.eyebrow}</p>
@@ -311,7 +371,7 @@ export default function Overview() {
                   <i></i>
                   {activeTab.label}
                 </span>
-                <span className="overview-story__media-caption">Live product reveal</span>
+                <span className="overview-story__media-caption">Product experience</span>
               </div>
 
               <div className="overview-story__media-stack">
@@ -330,7 +390,8 @@ export default function Overview() {
                     autoPlay
                     playsInline
                     preload="auto"
-                    onClick={toggleVideoPlayback}
+                    tabIndex={-1}
+                    aria-hidden="true"
                     onLoadStart={() => updateMediaState({ loading: true, error: false })}
                     onLoadedMetadata={() => updateMediaState({ loading: false, error: false })}
                     onLoadedData={() => updateMediaState({ loading: false, error: false })}
@@ -348,7 +409,8 @@ export default function Overview() {
 
                   {mediaState.error ? (
                     <div className="overview-story__media-state overview-story__media-state--error" aria-live="polite">
-                      <span>Video unavailable. Tap the tab again to retry.</span>
+                      <span>Video unavailable.</span>
+                      <button type="button" onClick={playActiveVideo}>Retry video</button>
                     </div>
                   ) : null}
 
@@ -368,8 +430,8 @@ export default function Overview() {
                         <span className="overview-story__tracking-line overview-story__tracking-line--x"></span>
                         <span className="overview-story__tracking-line overview-story__tracking-line--y"></span>
                         <div className="overview-story__tracking-metrics">
-                          <b>94%</b>
-                          <span>Training accuracy</span>
+                          <b>LIVE</b>
+                          <span>Session feedback</span>
                         </div>
                       </div>
                     ) : null}
@@ -377,18 +439,13 @@ export default function Overview() {
                 </div>
               </div>
 
-              <div className="overview-story__media-footer">
-                {TABS.map((tab, index) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    className={`overview-story__footer-pill ${activeIndex === index ? 'is-active' : ''}`}
-                    onClick={() => setOverviewTab(index)}
-                    aria-label={`Show ${tab.label}`}
-                  >
-                    {String(index + 1).padStart(2, '0')}
-                  </button>
-                ))}
+              <div className="overview-story__media-footer" aria-hidden="true">
+                <span>{String(activeIndex + 1).padStart(2, '0')} / {String(TABS.length).padStart(2, '0')}</span>
+                <div>
+                  {TABS.map((tab, index) => (
+                    <i key={tab.id} className={activeIndex === index ? 'is-active' : ''}></i>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

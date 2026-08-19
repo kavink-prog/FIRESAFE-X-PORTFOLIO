@@ -24,7 +24,12 @@ export default function Boot() {
         const load = async () => {
           if (loaded || cancelled) return;
           loaded = true;
-          await importer();
+          try {
+            await importer();
+          } catch (error) {
+            el.classList.add('sequence-fallback');
+            console.error(`Unable to load the experience for ${selector}.`, error);
+          }
         };
 
         const observer = new IntersectionObserver(
@@ -63,7 +68,7 @@ export default function Boot() {
 
       // 4) Below-the-fold visuals load only when the related section is near.
       importWhenNear('#problem', () => import('@/lib/experience/problem-video.js'), '350px 0px');
-      importWhenNear('#hardware', () => import('@/lib/experience/hardware-sequence.js'), '500px 0px');
+      importWhenNear('#product', () => import('@/lib/experience/product-sequence.js'), '700px 0px');
       importWhenNear('.finale', () => import('@/lib/experience/finale-scene.js'), '700px 0px');
     })();
 

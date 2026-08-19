@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { ConvexHttpClient } from 'convex/browser';
+import { api } from '@/convex/_generated/api';
 
 const INITIAL_FORM = {
   fullName: '',
@@ -33,6 +35,10 @@ export default function BookDemoModal() {
   const [errors, setErrors] = useState({});
 
   const minDate = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const convex = useMemo(() => {
+    const url = process.env.NEXT_PUBLIC_CONVEX_URL;
+    return url ? new ConvexHttpClient(url) : null;
+  }, []);
 
   const openModal = () => {
     window.clearTimeout(closeTimerRef.current);
@@ -144,12 +150,22 @@ export default function BookDemoModal() {
     setIsSubmitting(true);
 
     try {
-      await new Promise((resolve) => window.setTimeout(resolve, 900));
+      if (!convex) throw new Error('BOOKING_SERVICE_UNAVAILABLE');
+      await convex.mutation(api.demoRequests.create, {
+        fullName: form.fullName.trim(),
+        company: form.company.trim(),
+        email: form.email.trim().toLowerCase(),
+        phone: form.phone.trim(),
+        participants: Number(form.participants),
+        trainingDate: form.trainingDate,
+        requirements: form.requirements.trim(),
+        source: 'firesafex.ai homepage',
+      });
       setSubmitSuccess(true);
       setForm(INITIAL_FORM);
       setErrors({});
     } catch (_) {
-      setSubmitError('Something went wrong while preparing your booking request. Please try again.');
+      setSubmitError('We could not send your request. Please try again or email hello@firesafex.ai.');
     } finally {
       setIsSubmitting(false);
     }
@@ -178,8 +194,8 @@ export default function BookDemoModal() {
           <p className="eyebrow">Book Demo</p>
           <h2 id="book-demo-title">Book Your FireSafeX Training Session</h2>
           <p>
-            Tell us about your team, schedule, and training needs. We&apos;ll help you plan a FireSafeX session built
-            for realistic, measurable corporate fire safety training.
+            Tell us about your organization, schedule, and training needs. Our team will help you evaluate FireSafeX
+            for your fire safety training program.
           </p>
         </div>
 
@@ -270,7 +286,7 @@ export default function BookDemoModal() {
               rows="5"
               value={form.requirements}
               onChange={handleChange}
-              placeholder="Tell us about your training goals, site requirements, or compliance needs"
+              placeholder="Tell us about your training goals, locations, or program requirements"
               aria-invalid={Boolean(errors.requirements)}
             ></textarea>
             {errors.requirements ? <small>{errors.requirements}</small> : null}
@@ -280,7 +296,7 @@ export default function BookDemoModal() {
             <div className="book-demo-modal__status" aria-live="polite">
               {submitSuccess ? (
                 <p className="book-demo-modal__status-success">
-                  Booking request prepared successfully. Our team will contact you shortly.
+                  Your demo request has been sent. Our team will contact you shortly.
                 </p>
               ) : null}
               {submitError ? <p className="book-demo-modal__status-error">{submitError}</p> : null}

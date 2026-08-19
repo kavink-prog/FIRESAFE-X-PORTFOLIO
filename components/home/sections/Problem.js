@@ -16,7 +16,7 @@ export default function Problem() {
       <div className="problem__inner">
         <p className="eyebrow reveal">The problem</p>
         <h2 className="title" data-lines>Fire training is<br/><span className="red">caught between two extremes.</span></h2>
-        <p className="big center reveal">Traditional training depends on live burns, classroom-only instruction, or generic VR controllers. None of them combine practical realism, safety, measurable assessment, and scalable enterprise delivery in one system.</p>
+        <p className="big center reveal">Live-fire drills can be difficult to repeat at scale. Classroom-only learning may not show practical response skill, while controller-based simulations can remove the physical interaction trainees need to practise.</p>
 
         <div className="split reveal-img" id="splitCompare">
 
@@ -36,19 +36,16 @@ export default function Problem() {
               <h3 className="split__title">The old way.</h3>
               <ul className="split__list split__list--cross">
                 <li><span>Annual or infrequent sessions</span></li>
-                <li><span>Live fire risk and operational disruption</span></li>
+                <li><span>Operational planning for live-fire exercises</span></li>
                 <li><span>Manual records and limited assessment</span></li>
                 <li><span>Classroom-only theory without practical realism</span></li>
-                <li><span>One-time learning with low retention</span></li>
+                <li><span>Limited opportunities for repeat practice</span></li>
               </ul>
             </div>
           </article>
 
           <div className="split__seam" aria-hidden="true">
             <span className="split__seam-line"></span>
-            <span className="split__seam-badge">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            </span>
           </div>
 
           <article className="split__side split__side--new" data-side="new">
@@ -62,7 +59,7 @@ export default function Problem() {
               <h3 className="split__title split__title--grad">The new way.</h3>
               <ul className="split__list split__list--check">
                 <li><span>On-demand, reusable training</span></li>
-                <li><span>Safe simulation with zero live-burn risk</span></li>
+                <li><span>Simulation without staging a live fire</span></li>
                 <li><span>Real physical extinguisher handling</span></li>
                 <li><span>AI assessment and digital records</span></li>
                 <li><span>Theory plus practical competency building</span></li>
@@ -71,7 +68,7 @@ export default function Problem() {
           </article>
         </div>
 
-        <p className="problem__solved reveal"><span className="grad">We solved it.</span></p>
+        <p className="problem__solved reveal"><span className="grad">A connected alternative.</span></p>
       </div>
     </section>
   );
