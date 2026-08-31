@@ -14,6 +14,7 @@ export default function Boot() {
   useEffect(() => {
     let cancelled = false;
     const cleanups = [];
+    const root = document.documentElement;
 
     (async () => {
       const importWhenNear = (selector, importer, rootMargin = '400px 0px') => {
@@ -46,30 +47,39 @@ export default function Boot() {
         cleanups.push(() => observer.disconnect());
       };
 
-      // 1) Expose the motion libs as globals the legacy scripts expect.
-      const gsapMod = await import('gsap');
-      const stMod = await import('gsap/ScrollTrigger');
-      const lenisMod = await import('lenis');
+      try {
+        // 1) Expose the motion libs as globals the legacy scripts expect.
+        const gsapMod = await import('gsap');
+        const stMod = await import('gsap/ScrollTrigger');
+        const lenisMod = await import('lenis');
 
-      window.gsap = gsapMod.gsap || gsapMod.default;
-      window.ScrollTrigger = stMod.ScrollTrigger || stMod.default;
-      window.Lenis = lenisMod.default || lenisMod.Lenis;
+        window.gsap = gsapMod.gsap || gsapMod.default;
+        window.ScrollTrigger = stMod.ScrollTrigger || stMod.default;
+        window.Lenis = lenisMod.default || lenisMod.Lenis;
 
-      if (cancelled) return;
+        if (cancelled) return;
 
-      // 2) Run the scripts in the same order as the original index.html.
-      //    Order matters: script.js splits headings into words BEFORE
-      //    animations.js animates them.
-      await import('@/lib/boot/script.js');
-      await import('@/lib/boot/animations.js');
+        // 2) Run the scripts in the same order as the original index.html.
+        //    Order matters: script.js splits headings into words BEFORE
+        //    animations.js animates them.
+        await import('@/lib/boot/script.js');
+        await import('@/lib/boot/animations.js');
 
-      // 3) Above-the-fold interactive visuals.
-      await import('@/lib/experience/hero-sequence.js');
+        if (cancelled) return;
+        // CSS only hides reveal targets once GSAP has installed every trigger.
+        // Until this point the document remains readable, even on slow devices.
+        root.classList.add('motion-ready');
 
-      // 4) Below-the-fold visuals load only when the related section is near.
-      importWhenNear('#problem', () => import('@/lib/experience/problem-video.js'), '350px 0px');
-      importWhenNear('#product', () => import('@/lib/experience/product-sequence.js'), '700px 0px');
-      importWhenNear('.finale', () => import('@/lib/experience/finale-scene.js'), '700px 0px');
+        // 3) Above-the-fold interactive visuals.
+        await import('@/lib/experience/hero-sequence.js');
+
+        // 4) Below-the-fold visuals load only when the related section is near.
+        importWhenNear('.finale', () => import('@/lib/experience/finale-scene.js'), '700px 0px');
+      } catch (error) {
+        // A failed animation import must never leave the page at opacity: 0.
+        root.classList.remove('motion-ready');
+        console.error('Unable to initialize FireSafeX motion.', error);
+      }
     })();
 
     return () => {

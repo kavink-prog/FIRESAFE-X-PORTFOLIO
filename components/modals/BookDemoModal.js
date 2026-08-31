@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ConvexHttpClient } from 'convex/browser';
 import { api } from '@/convex/_generated/api';
+import { STORY_META, STORY_SECTIONS } from '@/data/story-content';
 
 const INITIAL_FORM = {
   fullName: '',
@@ -26,6 +27,8 @@ const REQUIRED_LABELS = {
 
 export default function BookDemoModal() {
   const closeTimerRef = useRef(null);
+  const panelRef = useRef(null);
+  const triggerRef = useRef(null);
   const [isRendered, setIsRendered] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,8 +43,11 @@ export default function BookDemoModal() {
     return url ? new ConvexHttpClient(url) : null;
   }, []);
 
-  const openModal = () => {
+  const closing = STORY_SECTIONS.at(-1);
+
+  const openModal = (trigger) => {
     window.clearTimeout(closeTimerRef.current);
+    triggerRef.current = trigger ?? document.activeElement;
     setIsRendered(true);
     requestAnimationFrame(() => setIsOpen(true));
   };
@@ -54,6 +60,7 @@ export default function BookDemoModal() {
       setIsSubmitting(false);
       setSubmitError('');
       setErrors({});
+      triggerRef.current?.focus?.();
     }, 280);
   };
 
@@ -63,39 +70,62 @@ export default function BookDemoModal() {
       if (!trigger) return;
 
       event.preventDefault();
-      openModal();
-    };
-
-    const handleEscape = (event) => {
-      if (event.key === 'Escape') closeModal();
+      openModal(trigger);
     };
 
     document.addEventListener('click', handleTriggerClick);
-    document.addEventListener('keydown', handleEscape);
 
     return () => {
       document.removeEventListener('click', handleTriggerClick);
-      document.removeEventListener('keydown', handleEscape);
       window.clearTimeout(closeTimerRef.current);
     };
   }, []);
 
   useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const panel = panelRef.current;
+    const focusableSelector =
+      'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), a[href]';
+    panel?.querySelector(focusableSelector)?.focus();
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeModal();
+        return;
+      }
+      if (event.key !== 'Tab' || !panel) return;
+
+      const focusable = [...panel.querySelectorAll(focusableSelector)];
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable.at(-1);
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
+  useEffect(() => {
     if (!isRendered) return undefined;
 
-    const lenis = window.__fireSafeXLenis;
     const html = document.documentElement;
     const previousOverflow = document.body.style.overflow;
     const previousHtmlOverflow = html.style.overflow;
 
     document.body.style.overflow = 'hidden';
     html.style.overflow = 'hidden';
-    html.classList.add('lenis-stopped');
-    lenis?.stop?.();
 
     return () => {
-      lenis?.start?.();
-      html.classList.remove('lenis-stopped');
       html.style.overflow = previousHtmlOverflow;
       document.body.style.overflow = previousOverflow;
     };
@@ -184,19 +214,21 @@ export default function BookDemoModal() {
       }}
     >
       <div className="book-demo-modal__backdrop" aria-hidden="true" onMouseDown={closeModal}></div>
-      <div className="book-demo-modal__panel" data-lenis-prevent onMouseDown={(event) => event.stopPropagation()}>
+      <div
+        className="book-demo-modal__panel"
+        ref={panelRef}
+        onMouseDown={(event) => event.stopPropagation()}
+      >
         <button type="button" className="book-demo-modal__close" onClick={closeModal} aria-label="Close booking form">
           <span></span>
           <span></span>
         </button>
 
         <div className="book-demo-modal__intro">
-          <p className="eyebrow">Book Demo</p>
-          <h2 id="book-demo-title">Book Your FireSafeX Training Session</h2>
-          <p>
-            Tell us about your organization, schedule, and training needs. Our team will help you evaluate FireSafeX
-            for your fire safety training program.
-          </p>
+          <p className="eyebrow">{STORY_META.cta}</p>
+          <h2 id="book-demo-title">{closing.title}</h2>
+          <p>{closing.subtitle}</p>
+          <p>{closing.body}</p>
         </div>
 
         <form className="book-demo-modal__form" noValidate onSubmit={handleSubmit}>
@@ -303,7 +335,7 @@ export default function BookDemoModal() {
             </div>
 
             <button type="submit" className="btn btn--blue" disabled={isSubmitting}>
-              {isSubmitting ? 'Sending Request...' : 'Submit Booking Request'}
+              {isSubmitting ? 'Sending Request...' : closing.cta}
             </button>
           </div>
         </form>

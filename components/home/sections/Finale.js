@@ -1,15 +1,18 @@
+import { SITE_CONTENT } from '@/data/site-content';
+
 export default function Finale() {
+  const { closing, hero } = SITE_CONTENT;
   return (
     <div className="finale">
       <canvas id="finaleCanvas" className="finale__canvas" aria-hidden="true"></canvas>
       <section id="cta" className="cta cta--finale">
         <div className="cta__inner">
-          <p className="eyebrow reveal">Build practical fire safety readiness</p>
-          <h2 className="cta__title reveal">Train the response. Measure the skill. Build readiness.</h2>
-          <p className="cta__sub reveal">Explore how FireSafeX can bring together practical equipment, mixed reality training, intelligent guidance, assessment, and enterprise program visibility for your organization.</p>
+          <p className="eyebrow reveal">{closing.title}</p>
+          <h2 className="cta__title reveal">{closing.subtitle}</h2>
+          <p className="cta__sub reveal">{hero.statement}</p>
           <div className="cta__buttons reveal">
-            <a href="#cta" className="btn btn--blue" data-book-demo>Book a FireSafeX demo</a>
-            <a href="mailto:hello@firesafex.ai" className="link">Talk to our team <span aria-hidden="true">›</span></a>
+            <a href="#cta" className="btn btn--blue" data-book-demo>{closing.cta}</a>
+            <a href="mailto:hello@firesafex.ai" className="link">Contact <span aria-hidden="true">›</span></a>
           </div>
         </div>
       </section>
@@ -17,35 +20,34 @@ export default function Finale() {
       <footer className="footer footer--dark">
         <div className="footer__cols">
           <div>
-            <h6>Product</h6>
-            <a href="#product">Smart extinguisher</a>
-            <a href="#overview">Mixed reality</a>
-            <a href="#overview">AI safety expert</a>
-            <a href="#assessment">Assessment</a>
+            <h6>{SITE_CONTENT.productOverview.title}</h6>
+            {SITE_CONTENT.productOverview.items.map((item) => (
+              <a href={`#overview-${item.id}`} key={item.id}>{item.title}</a>
+            ))}
           </div>
           <div>
-            <h6>Solutions</h6>
-            <a href="#workflow">How it works</a>
-            <a href="#platform">Enterprise platform</a>
-            <a href="#global-readiness">Global readiness</a>
-            <a href="#industries">Industries</a>
-            <a href="#cta" data-book-demo>Book a demo</a>
+            <h6>{SITE_CONTENT.solutionFeatures.title}</h6>
+            <a href="#solution">{SITE_CONTENT.connectedSolution.title}</a>
+            <a href="#features">{SITE_CONTENT.solutionFeatures.title}</a>
+            <a href="#package">{SITE_CONTENT.package.title}</a>
           </div>
           <div>
-            <h6>Ecosystem</h6>
-            <a href="#ecosystem">Connected system</a>
-            <a href="#platform">Dashboard and analytics</a>
-            <a href="#platform">Certification records</a>
+            <h6>{SITE_CONTENT.enterprise.title}</h6>
+            <a href="#platform">{SITE_CONTENT.enterprise.title}</a>
+            <a href="#workflow">{SITE_CONTENT.workflow.title}</a>
+            <a href="#learning">{SITE_CONTENT.learning.title}</a>
+            <a href="#outcomes">{SITE_CONTENT.outcomes.title}</a>
           </div>
           <div>
-            <h6>Company</h6>
-            <a href="#about">About FireSafeX</a>
+            <h6>{SITE_CONTENT.industries.title}</h6>
+            <a href="#industries">{SITE_CONTENT.industries.subtitle}</a>
+            <a href="#about">{SITE_CONTENT.about.label}</a>
+            <a href="#cta" data-book-demo>{closing.cta}</a>
             <a href="mailto:hello@firesafex.ai">Contact</a>
-            <a href="#cta" data-book-demo>Book a demo</a>
           </div>
         </div>
         <div className="footer__bottom">
-          <small>© 2026 FireSafeX. AI-powered fire safety training ecosystem.</small>
+          <small>© 2026 FireSafeX. {hero.category}.</small>
         </div>
       </footer>
     </div>

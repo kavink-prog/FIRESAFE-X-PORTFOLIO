@@ -1,81 +1,75 @@
 'use client';
 
-import Image from "next/image";
-import { useEffect, useState } from "react";
-
-import appleTouchIcon from "../../public/icons/apple-touch-icon.png";
-
-const NAV_LINKS = [
-  { href: '#product', label: 'Product' },
-  { href: '#workflow', label: 'How it works' },
-  { href: '#platform', label: 'Platform' },
-  { href: '#industries', label: 'Industries' },
-  { href: '#about', label: 'About' },
-];
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import { STORY_META, STORY_NAV_LINKS, STORY_SECTIONS } from '@/data/story-content';
 
 export default function Nav() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState(STORY_SECTIONS[0].id);
 
   useEffect(() => {
-    const closeOnEscape = (event) => {
-      if (event.key === 'Escape') setIsMenuOpen(false);
-    };
-    const closeOnDesktop = () => {
-      if (window.innerWidth > 768) setIsMenuOpen(false);
-    };
+    const sections = [...document.querySelectorAll('[data-story-section]')];
+    const revealObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) entry.target.classList.add('is-visible');
+        });
+      },
+      { rootMargin: '0px 0px -14% 0px', threshold: 0.14 },
+    );
+    const activeObserver = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) setActiveSection(visible.target.id);
+      },
+      { rootMargin: '-28% 0px -48% 0px', threshold: [0, 0.2, 0.5, 0.8] },
+    );
 
-    window.addEventListener('keydown', closeOnEscape);
-    window.addEventListener('resize', closeOnDesktop);
+    sections.forEach((section, index) => {
+      if (index === 0) section.classList.add('is-visible');
+      revealObserver.observe(section);
+      activeObserver.observe(section);
+    });
 
     return () => {
-      window.removeEventListener('keydown', closeOnEscape);
-      window.removeEventListener('resize', closeOnDesktop);
+      revealObserver.disconnect();
+      activeObserver.disconnect();
     };
   }, []);
 
-  const closeMenu = () => setIsMenuOpen(false);
-
   return (
-    <header className={`nav ${isMenuOpen ? 'nav--menu-open' : ''}`}>
-      <div className="nav__inner">
-        <a href="#top" className="nav__brand" onClick={closeMenu}>
-          {/* Plain img tag — next/image is incompatible with output:'export'
-              for small local icons. The file is served directly from /icons/. */}
-          <Image
-            src={appleTouchIcon}
-            alt="FireSafeX"
-            width={36}
-            height={36}
-            className="nav__logo"
-            loading="eager"
-          />
-          <span className="nav__brand-text">FireSafe<span className="nav__brand-x">X</span></span>
+    <header className="story-nav">
+      <div className="story-nav__inner">
+        <a href="#nexgen" className="story-nav__brand" aria-label="FireSafeX home">
+          <Image src="/icons/apple-touch-icon.png" alt="" width={34} height={34} priority unoptimized />
+          <span>FireSafe<strong>X</strong><small>NexGen</small></span>
         </a>
-        <nav id="primary-navigation" className="nav__links" aria-label="Primary navigation">
-          {NAV_LINKS.map((link) => (
-            <a key={link.href} href={link.href} onClick={closeMenu}>{link.label}</a>
-          ))}
+
+        <nav className="story-nav__rail" aria-label="Page sections">
+          {STORY_NAV_LINKS.map((link, index) => {
+            const id = link.href.slice(1);
+            const isActive = activeSection === id;
+            return (
+              <a
+                href={link.href}
+                className={isActive ? 'is-active' : ''}
+                aria-current={isActive ? 'location' : undefined}
+                key={link.href}
+              >
+                <span aria-hidden="true">{index + 1}</span>
+                <b>{link.label}</b>
+              </a>
+            );
+          })}
         </nav>
-        <button
-          type="button"
-          className="nav__menu-toggle"
-          aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-          aria-controls="primary-navigation"
-          aria-expanded={isMenuOpen}
-          onClick={() => setIsMenuOpen((open) => !open)}
-        >
-          <span></span>
-          <span></span>
+
+        <button type="button" className="story-nav__cta" data-book-demo>
+          <i aria-hidden="true" />
+          {STORY_META.cta.replace(' →', '')}
         </button>
-        <a href="#cta" className="nav__buy" data-book-demo>Book demo <span aria-hidden="true">›</span></a>
       </div>
-      <button
-        type="button"
-        className="nav__scrim"
-        aria-label="Close navigation menu"
-        tabIndex={isMenuOpen ? 0 : -1}
-        onClick={closeMenu}
-      />
     </header>
   );
 }

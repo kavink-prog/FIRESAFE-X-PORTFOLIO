@@ -1,16 +1,22 @@
+import MediaGallery from '@/components/media/MediaGallery';
+import { EVENT_MEDIA } from '@/data/media-content';
+import { SITE_CONTENT } from '@/data/site-content';
+
 export default function About() {
+  const about = SITE_CONTENT.about;
   return (
-    <section id="about" className="about-story">
-      <div className="about-story__inner">
-        <p className="eyebrow reveal">About FireSafeX</p>
-        <div className="about-story__grid">
-          <h2 className="title reveal">Turning fire safety knowledge<br/><span className="grad">into practical readiness.</span></h2>
-          <div className="about-story__copy reveal">
-            <p>FireSafeX exists to close the gap between learning a fire response procedure and demonstrating it in practice.</p>
-            <p>Our product approach connects physical interaction, immersive simulation, intelligent guidance, measurable assessment, and enterprise training management in one ecosystem.</p>
-            <a className="link" href="#cta" data-book-demo>Discuss your training needs <span aria-hidden="true">›</span></a>
-          </div>
+    <section id="about" className="about-document">
+      <div className="about-document__inner">
+        <div className="about-document__copy reveal">
+          <p className="eyebrow">{about.label}</p>
+          <h2 className="title">{about.title}</h2>
+          {about.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
         </div>
+        <MediaGallery
+          items={EVENT_MEDIA}
+          variant="event"
+          label="FireSafeX event media"
+        />
       </div>
     </section>
   );

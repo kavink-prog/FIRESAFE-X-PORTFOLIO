@@ -1,34 +1,26 @@
-const LAYERS = [
-  ['01', 'Smart hardware', 'Capture practical extinguisher actions through a connected physical training device.'],
-  ['02', 'Mixed reality', 'Place repeatable fire response scenarios within the trainee’s surrounding environment.'],
-  ['03', 'AI guidance', 'Support theory learning, questions, and guided practice with an AI safety expert.'],
-  ['04', 'Assessment', 'Turn response actions into visible feedback, scoring, and training outcomes.'],
-  ['05', 'Cloud platform', 'Manage users, records, certification workflows, and program visibility.'],
-];
+import { SITE_CONTENT } from '@/data/site-content';
 
 export default function Solution() {
+  const solution = SITE_CONTENT.connectedSolution;
   return (
-    <section id="solution" className="solution-story">
-      <div className="solution-story__inner">
-        <div className="solution-story__intro">
-          <p className="eyebrow reveal">The FireSafeX solution</p>
-          <h2 className="title reveal">One connected fire safety<br/><span className="grad">training ecosystem.</span></h2>
-          <p className="big reveal">FireSafeX links the equipment trainees hold, the scenario they see, the guidance they receive, and the performance organizations need to review.</p>
-          <a className="link reveal" href="#product">Explore the product experience <span aria-hidden="true">›</span></a>
+    <section id="solution" className="connected-solution">
+      <div className="connected-solution__inner">
+        <div className="connected-solution__intro reveal">
+          <p className="eyebrow">Our Solution: FireSafeX</p>
+          <h2 className="title">{solution.title}</h2>
+          <p className="connected-solution__flow">{solution.flow}</p>
+          <p className="big">{solution.lead}</p>
         </div>
-
-        <div className="solution-story__layers" aria-label="FireSafeX connected solution layers">
-          {LAYERS.map(([num, title, copy]) => (
-            <article className="solution-story__layer reveal" key={num}>
-              <span>{num}</span>
-              <div>
-                <h3>{title}</h3>
-                <p>{copy}</p>
-              </div>
-            </article>
+        <ol className="connected-solution__list">
+          {solution.points.map((point, index) => (
+            <li className="reveal" key={point}>
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              <strong>{point}</strong>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
     </section>
   );
 }
+

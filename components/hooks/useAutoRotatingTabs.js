@@ -10,6 +10,7 @@ export default function useAutoRotatingTabs({ count, intervalMs = 5000, initialI
   const [isDocumentVisible, setIsDocumentVisible] = useState(true);
   const [isPointerPaused, setIsPointerPaused] = useState(false);
   const [isFocusPaused, setIsFocusPaused] = useState(false);
+  const [isDisclosurePaused, setIsDisclosurePaused] = useState(false);
   const [isUserPaused, setIsUserPaused] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
@@ -50,10 +51,12 @@ export default function useAutoRotatingTabs({ count, intervalMs = 5000, initialI
       isUserPaused ||
       isPointerPaused ||
       isFocusPaused ||
+      isDisclosurePaused ||
       !isInView ||
       !isDocumentVisible,
     [
       isDocumentVisible,
+      isDisclosurePaused,
       isFocusPaused,
       isInView,
       isPointerPaused,
@@ -99,6 +102,11 @@ export default function useAutoRotatingTabs({ count, intervalMs = 5000, initialI
     },
     onBlurCapture: (event) => {
       if (!event.currentTarget.contains(event.relatedTarget)) setIsFocusPaused(false);
+    },
+    onToggleCapture: () => {
+      requestAnimationFrame(() => {
+        setIsDisclosurePaused(Boolean(containerRef.current?.querySelector('details[open]')));
+      });
     },
   };
 
