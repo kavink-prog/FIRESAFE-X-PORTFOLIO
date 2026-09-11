@@ -14,6 +14,7 @@ export default function StoryPage() {
         <div className="story-intro__sticky">
           <div className="story-intro__copy">
             <span className="story-section__number" aria-hidden="true">01 / 07</span>
+            <p className="story-intro__brand">{intro.brand}</p>
             <h1>{intro.title}</h1>
             <p className="story-section__subtitle">{intro.subtitle}</p>
             <p className="story-section__body">{intro.body}</p>

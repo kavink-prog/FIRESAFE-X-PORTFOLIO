@@ -19,14 +19,28 @@ export default function ProductGallery({ media, priority = false }) {
   return (
     <div className="product-gallery" aria-label="FireSafeX product gallery">
       <figure className="product-gallery__stage">
-        <Image
-          key={activeItem.src}
-          src={activeItem.src}
-          alt={activeItem.alt}
-          fill
-          priority={priority}
-          sizes="(max-width: 900px) 100vw, 62vw"
-        />
+        <div className="product-gallery__artwork" key={activeItem.src}>
+          <Image
+            src={activeItem.src}
+            alt={activeItem.alt}
+            fill
+            priority={priority}
+            sizes="(max-width: 900px) 100vw, 62vw"
+          />
+
+          {activeItem.displayStatus ? (
+            <span className="product-display-status" aria-hidden="true">
+              <span className="product-display-status__state product-display-status__state--on">
+                <b>FireSafeX</b>
+                <small>Turn On</small>
+              </span>
+              <span className="product-display-status__state product-display-status__state--off">
+                <b>FireSafeX</b>
+                <small>Turn Off</small>
+              </span>
+            </span>
+          ) : null}
+        </div>
       </figure>
 
       {hasMultiple ? (

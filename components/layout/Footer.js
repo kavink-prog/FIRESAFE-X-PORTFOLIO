@@ -27,7 +27,7 @@ export default function Footer() {
         <nav className="story-footer__nav" aria-label="Footer navigation">
           <a href="#nexgen">Home</a>
           <a href="#solution-features">How It Works</a>
-          <a href="#workplace">Book a Demo</a>
+          <a href="#workplace">07 / 07 Ready to Train for Real?</a>
         </nav>
 
         <p>© 2026 FireSafeX</p>

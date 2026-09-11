@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import EcosystemScreens from '@/components/home/EcosystemScreens';
+import { ECOSYSTEM_SCREENS } from '@/data/ecosystem-screens';
 
 function MediaSet({ media, mobile = false }) {
   const kind = media[0]?.kind ?? 'event';
@@ -85,7 +87,12 @@ function WhyShowcase({ section }) {
       >
         {section.cards.map((card) => (
           <article className="why-showcase__card" key={card.title}>
-            <h3>{card.title}</h3>
+            <div className="why-showcase__image-wrap">
+              <h3>{card.title}</h3>
+              {card.image ? (
+                <img className="why-showcase__photo" src={card.image} alt={card.alt} loading="lazy" decoding="async" />
+              ) : null}
+            </div>
           </article>
         ))}
       </div>
@@ -128,10 +135,6 @@ export default function StoryJourney({ sections, mediaBySection }) {
   const whySection = sections[0];
   const journeySections = sections.slice(1);
   const [activeId, setActiveId] = useState(journeySections[0].id);
-  const activeIndex = Math.max(
-    journeySections.findIndex((section) => section.id === activeId),
-    0,
-  );
 
   useEffect(() => {
     const chapters = journeySections
@@ -157,11 +160,8 @@ export default function StoryJourney({ sections, mediaBySection }) {
 
       <div className="story-journey__inner">
         <aside className="journey-visual" aria-label="FireSafeX story visuals">
-          <div className="journey-visual__frame">
-            <div className="journey-visual__hud" aria-hidden="true">
-              <span><i /> Live system view</span>
-              <span>{String(activeIndex + 3).padStart(2, '0')} / 07</span>
-            </div>
+          <div className="journey-visual__frame journey-visual__frame--images">
+
 
             {journeySections.map((section) => (
               <div
@@ -169,7 +169,9 @@ export default function StoryJourney({ sections, mediaBySection }) {
                 aria-hidden={section.id !== activeId}
                 key={section.id}
               >
-                <MediaSet media={mediaBySection[section.id]} />
+                {ECOSYSTEM_SCREENS[section.id] ? (
+                  <EcosystemScreens screens={ECOSYSTEM_SCREENS[section.id]} sectionId={`${section.id}-desktop`} placeholderLabel={section.navLabel} />
+                ) : <MediaSet media={mediaBySection[section.id]} />}
               </div>
             ))}
 
@@ -214,7 +216,11 @@ export default function StoryJourney({ sections, mediaBySection }) {
                   </div>
                 ) : null}
               </div>
-              <MediaSet media={mediaBySection[section.id]} mobile />
+              {ECOSYSTEM_SCREENS[section.id] ? (
+                <div className="journey-mobile-screens">
+                  <EcosystemScreens screens={ECOSYSTEM_SCREENS[section.id]} sectionId={`${section.id}-mobile`} placeholderLabel={section.navLabel} />
+                </div>
+              ) : <MediaSet media={mediaBySection[section.id]} mobile />}
             </section>
           ))}
         </div>

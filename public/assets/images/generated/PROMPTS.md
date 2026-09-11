@@ -1,0 +1,11 @@
+# Generated website visuals
+
+Created with the built-in image_gen tool. Original PNGs are saved alongside this file and used directly by the website. These are concept illustrations, not product screenshots.
+
+## smart-training-v1
+
+Use case: stylized-concept. Create a polished landscape 3:2 raster website illustration for FireSafeX Smart Training. Reference image 1 is the actual mixed-reality barrel-fire scenario; reference image 2 is the actual assessment screen, use them as subject and color references, not as edit targets. Depict an immersive first-person training scene with a simulated barrel fire, a controlled white extinguishing plume directed toward its base, and restrained floating guidance and assessment panels. Make it clearly a premium illustrative visualization, not a claimed real software screenshot. Dark charcoal environment, warm orange accents matching references, crisp realistic 3D materials, uncluttered composition readable at small sizes. Only text: 'AI guidance', 'Practice', 'Assessment' on three minimal panels. No invented scores, timestamps, certificates, logos, excessive UI or large headline. Keep focal scene fully within frame.
+
+## enterprise-training-v1
+
+Use case: stylized-concept. Create a polished landscape 3:2 raster website illustration for FireSafeX Enterprise: one team, multiple sites, consistent training and centralized progress. Reference image 1 shows the real workplace training context; reference image 2 supplies the charcoal/orange assessment visual language. They are references, not edit targets. Create an elegant isometric 3D concept scene on dark charcoal: three small distinct workplace campus models (office, factory, warehouse), each with a small group of simplified people, linked by thin warm orange paths to one central upright training-record panel. Panel contains only simple completion checkmarks, user icons and a certificate icon, no numeric metrics. Clearly an illustrative enterprise training concept, not a software screenshot or a documentary photo. Premium restrained materials, soft warm lighting, ample breathing room, no dense details. Only text is three small tasteful labels: 'Sites', 'Teams', 'Training records'. No company logos, invented customers, maps, claims or statistics.

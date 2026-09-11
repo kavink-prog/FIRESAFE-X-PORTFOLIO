@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import Lenis from 'lenis';
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
@@ -9,52 +8,99 @@ export default function ScrollExperience() {
   useEffect(() => {
     const root = document.documentElement;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-
-    if (reducedMotion.matches) return undefined;
-
     const sections = [...document.querySelectorAll('[data-story-section]')];
+    const hero = document.querySelector('#nexgen');
+    const heroProduct = hero?.querySelector('.story-intro__product');
+    let sectionMetrics = [];
     let frame = 0;
-    let lenisFrame = 0;
-    let velocityTimer = 0;
+    let isDisposed = false;
+    let animateSections = false;
 
-    const lenis = new Lenis({
-      duration: 1.15,
-      easing: (time) => Math.min(1, 1.001 - Math.pow(2, -10 * time)),
-      orientation: 'vertical',
-      smoothWheel: true,
-      wheelMultiplier: 0.88,
-      touchMultiplier: 1.1,
-    });
+    const clearSectionMotion = () => {
+      sections.forEach((section) => {
+        section.style.removeProperty('--section-progress');
+        section.style.removeProperty('--section-travel');
+        section.style.removeProperty('--section-focus');
+        ['x', 'y', 'rotation', 'opacity'].forEach((property) => {
+          section.style.removeProperty(`--chapter-arc-${property}`);
+        });
+        section.style.removeProperty('--hero-center-progress');
+        section.style.removeProperty('--hero-exit-progress');
+      });
+    };
 
-    root.classList.add('story-motion');
+    const refreshMetrics = () => {
+      animateSections = !reducedMotion.matches && window.innerWidth > 900;
+      root.classList.toggle('story-motion', animateSections);
+
+      if (!animateSections) {
+        sectionMetrics = [];
+        clearSectionMotion();
+        return;
+      }
+
+      const scrollY = window.scrollY;
+      sectionMetrics = sections.map((section) => {
+        const bounds = section.getBoundingClientRect();
+        return {
+          element: section,
+          top: bounds.top + scrollY,
+          height: bounds.height,
+        };
+      });
+    };
 
     const update = () => {
       frame = 0;
       const viewportHeight = window.innerHeight;
       const scrollRange = Math.max(document.documentElement.scrollHeight - viewportHeight, 1);
-      const pageProgress = clamp(window.scrollY / scrollRange, 0, 1);
+      const scrollY = window.scrollY;
+      const pageProgress = clamp(scrollY / scrollRange, 0, 1);
 
       root.style.setProperty('--page-progress', pageProgress.toFixed(4));
 
-      sections.forEach((section) => {
-        const bounds = section.getBoundingClientRect();
-        const travel = bounds.height + viewportHeight;
-        const viewportProgress = clamp((viewportHeight - bounds.top) / travel, 0, 1);
-        const localScrollRange = Math.max(bounds.height - viewportHeight, 1);
-        const localProgress = clamp(-bounds.top / localScrollRange, 0, 1);
+      if (!animateSections) {
+        if (!reducedMotion.matches && hero && heroProduct) {
+          const bounds = heroProduct.getBoundingClientRect();
+          const exitProgress = clamp(-bounds.top / Math.max(bounds.height * 0.3, 1), 0, 1);
+          hero.style.setProperty('--hero-exit-progress', exitProgress.toFixed(4));
+        }
+        return;
+      }
+
+      sectionMetrics.forEach(({ element, top, height }) => {
+        const relativeTop = top - scrollY;
+        const travel = height + viewportHeight;
+        const viewportProgress = clamp((viewportHeight - relativeTop) / travel, 0, 1);
+        const localScrollRange = Math.max(height - viewportHeight, 1);
+        const localProgress = clamp(-relativeTop / localScrollRange, 0, 1);
         const centeredProgress = viewportProgress * 2 - 1;
         const focus = clamp(1 - Math.abs(centeredProgress) * 1.35, 0, 1);
 
-        section.style.setProperty('--section-progress', centeredProgress.toFixed(4));
-        section.style.setProperty('--section-travel', localProgress.toFixed(4));
-        section.style.setProperty('--section-focus', focus.toFixed(4));
+        element.style.setProperty('--section-progress', centeredProgress.toFixed(4));
+        element.style.setProperty('--section-travel', localProgress.toFixed(4));
+        element.style.setProperty('--section-focus', focus.toFixed(4));
 
-        if (section.id === 'nexgen') {
+        if (element.classList.contains('journey-chapter')) {
+          // Sweep around the outside of the image, resting beside it for reading.
+          const distance = Math.max(Math.abs(centeredProgress) - 0.16, 0) / 0.84;
+          const angle = Math.sign(centeredProgress) * distance * Math.PI / 2;
+          const radius = Math.min(window.innerWidth * 0.24, 360);
+          element.style.setProperty('--chapter-arc-x', `${((1 - Math.cos(angle)) * radius).toFixed(2)}px`);
+          element.style.setProperty('--chapter-arc-y', `${(-Math.sin(angle) * radius).toFixed(2)}px`);
+          element.style.setProperty('--chapter-arc-rotation', `${(angle * 18 / (Math.PI / 2)).toFixed(2)}deg`);
+          element.style.setProperty('--chapter-arc-opacity', (1 - distance * 0.8).toFixed(3));
+        }
+
+        if (element.id === 'nexgen') {
           const centerProgress = clamp(localProgress / 0.48, 0, 1);
-          const exitProgress = clamp((localProgress - 0.64) / 0.27, 0, 1);
+          // Keep the product visible throughout the pinned scene; fade only
+          // once the hero is leaving and the comparison section is entering.
+          const exitDistance = scrollY - (top + height - viewportHeight);
+          const exitProgress = clamp(exitDistance / (viewportHeight * 0.65), 0, 1);
 
-          section.style.setProperty('--hero-center-progress', centerProgress.toFixed(4));
-          section.style.setProperty('--hero-exit-progress', exitProgress.toFixed(4));
+          element.style.setProperty('--hero-center-progress', centerProgress.toFixed(4));
+          element.style.setProperty('--hero-exit-progress', exitProgress.toFixed(4));
         }
       });
     };
@@ -63,60 +109,35 @@ export default function ScrollExperience() {
       if (!frame) frame = window.requestAnimationFrame(update);
     };
 
-    update();
-    const runLenis = (time) => {
-      lenis.raf(time);
-      lenisFrame = window.requestAnimationFrame(runLenis);
-    };
-
-    const handleLenisScroll = ({ velocity = 0 }) => {
-      const velocityStrength = clamp(velocity / 24, -1, 1);
-      root.style.setProperty('--scroll-tilt', `${(velocityStrength * 0.75).toFixed(3)}deg`);
-      root.style.setProperty('--scroll-energy', Math.abs(velocityStrength).toFixed(3));
+    const handleScroll = () => {
       requestUpdate();
-
-      window.clearTimeout(velocityTimer);
-      velocityTimer = window.setTimeout(() => {
-        root.style.setProperty('--scroll-tilt', '0deg');
-        root.style.setProperty('--scroll-energy', '0');
-      }, 120);
     };
 
-    lenis.on('scroll', handleLenisScroll);
-    lenisFrame = window.requestAnimationFrame(runLenis);
-    window.addEventListener('resize', requestUpdate);
-
-    const handleAnchorClick = (event) => {
-      const anchor = event.target.closest('a[href^="#"]');
-      if (!anchor) return;
-
-      const target = document.querySelector(anchor.getAttribute('href'));
-      if (!target) return;
-
-      event.preventDefault();
-      lenis.scrollTo(target, { offset: -60, duration: 1.2 });
+    const handleResize = () => {
+      refreshMetrics();
+      requestUpdate();
     };
 
-    document.addEventListener('click', handleAnchorClick);
+    refreshMetrics();
+    update();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
+    window.addEventListener('load', handleResize, { once: true });
+    reducedMotion.addEventListener?.('change', handleResize);
+    document.fonts?.ready.then(() => {
+      if (!isDisposed) handleResize();
+    });
 
     return () => {
-      lenis.destroy();
+      isDisposed = true;
       root.classList.remove('story-motion');
       root.style.removeProperty('--page-progress');
-      root.style.removeProperty('--scroll-tilt');
-      root.style.removeProperty('--scroll-energy');
-      window.removeEventListener('resize', requestUpdate);
-      document.removeEventListener('click', handleAnchorClick);
-      window.clearTimeout(velocityTimer);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('load', handleResize);
+      reducedMotion.removeEventListener?.('change', handleResize);
       if (frame) window.cancelAnimationFrame(frame);
-      if (lenisFrame) window.cancelAnimationFrame(lenisFrame);
-      sections.forEach((section) => {
-        section.style.removeProperty('--section-progress');
-        section.style.removeProperty('--section-travel');
-        section.style.removeProperty('--section-focus');
-        section.style.removeProperty('--hero-center-progress');
-        section.style.removeProperty('--hero-exit-progress');
-      });
+      clearSectionMotion();
     };
   }, []);
 

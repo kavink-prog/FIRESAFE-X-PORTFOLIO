@@ -23,6 +23,7 @@ This addendum extends `FireSafeX_Concise_Website_Content.docx` with approved sal
 - **Easy to understand — Clear training flows:** Clear multilingual learning and training flows help users start confidently.
 - **End-to-end onboarding — Supported rollout:** Our team supports setup, users, roles, sessions, training, assessments, and certificates.
 - **Customizable content — Built for each team:** Adapt courses, scenarios, assessments, and languages for each team.
+- **Multilingual training — Learn in your language:** Deliver guided learning and training flows in the user’s preferred language.
 - **Within 1 business day — Complete setup:** Complete organizational setup and onboarding, subject to access and content readiness.
 
 On the website, each Ecosystem highlight card displays only its title and optional short subtitle. The explanatory text above remains a content reference and is not displayed inside the cards.

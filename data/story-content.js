@@ -2,8 +2,9 @@ export const STORY_SECTIONS = [
   {
     id: 'nexgen',
     navLabel: 'Home',
-    title: 'Anywhere. Any Place. Anytime.',
-    subtitle: 'FireSafeX NexGen — Train. Feel It’s Real. Respond With Confidence.',
+    brand: 'FireSafeX NexGen',
+    title: 'Train. Feel It’s Real. Respond With Confidence.',
+    subtitle: 'Any place. Anytime. Anywhere.',
     body:
       'FireSafeX is an end-to-end mixed-reality fire safety training system. It combines a physical smart extinguisher, AI guidance, realistic fire scenarios, one-click assessments, and verified digital certificates in one portable solution.',
     cta: 'Book a Live Demo',
@@ -17,9 +18,9 @@ export const STORY_SECTIONS = [
     title: 'Why FireSafeX?',
     subtitle: 'Carry Anywhere. Scale Everywhere. Train for Up to 11 Days.',
     cards: [
-      { title: 'Traditional Training Method' },
-      { title: 'VR Fire Safety Training' },
-      { title: 'Our Solution: FireSafeX' },
+      { title: 'Traditional Training Method', image: '/assets/images/generated/comparison-traditional-team-v5.png', alt: 'Illustrative scene: an instructor explains a conventional fire extinguisher to three classroom participants' },
+      { title: 'VR Fire Safety Training', image: '/assets/images/generated/comparison-vr-team-v4.png', alt: 'Illustrative scene: a participant practices with a VR headset and two controllers as an instructor guides him' },
+      { title: 'Our Solution: FireSafeX', image: '/assets/images/generated/comparison-firesafex-professional-v2.png', alt: 'Refined FireSafeX training photo showing a participant with the physical smart extinguisher and mixed-reality headset in a professional training room' },
     ],
   },
   {
@@ -57,6 +58,10 @@ export const STORY_SECTIONS = [
       {
         value: 'Customizable content',
         label: 'Built for each team',
+      },
+      {
+        value: 'Multilingual training',
+        label: 'Learn in your language',
       },
       {
         value: 'Within 1 business day',
@@ -100,6 +105,7 @@ export const STORY_MEDIA = {
       src: '/assets/images/product/refined/product-1000162320.webp',
       alt: 'FireSafeX smart training system',
       kind: 'product',
+      displayStatus: true,
     },
   ],
   'why-firesafex': [],
@@ -175,9 +181,8 @@ export const STORY_MEDIA = {
   ],
   workplace: [
     {
-      src: '/assets/images/events/refined/event-16.webp',
-      mobileSrc: '/assets/images/responsive/event-16-720.webp',
-      alt: 'FireSafeX deployment with a workplace training team',
+      src: '/assets/images/generated/workplace-demo-product-v2.png',
+      alt: 'AI-generated realistic scene of a workplace team practicing with a mixed-reality headset and FireSafeX extinguisher',
       kind: 'event',
     },
   ],
