@@ -3,8 +3,13 @@ import { v } from 'convex/values';
 
 // Hands the uploader a short-lived URL to POST raw file bytes to. The POST
 // responds with { storageId }, which we then resolve to a public URL below.
-export const generateUploadUrl = mutation(async (ctx) => {
-  return await ctx.storage.generateUploadUrl();
+export const generateUploadUrl = mutation({
+  args: { adminToken: v.string() },
+  handler: async (ctx, { adminToken }) => {
+    const expected = process.env.MEDIA_UPLOAD_ADMIN_TOKEN;
+    if (!expected || adminToken !== expected) throw new Error('Unauthorized');
+    return await ctx.storage.generateUploadUrl();
+  },
 });
 
 // Resolves a stored file to its stable, public serving URL

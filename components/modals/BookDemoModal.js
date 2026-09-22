@@ -1,9 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ConvexHttpClient } from 'convex/browser';
-import { api } from '@/convex/_generated/api';
-import { STORY_META, STORY_SECTIONS } from '@/data/story-content';
 
 const INITIAL_FORM = {
   fullName: '',
@@ -16,13 +13,13 @@ const INITIAL_FORM = {
 };
 
 const REQUIRED_LABELS = {
-  fullName: 'Full Name',
-  company: 'Company / Organization Name',
-  email: 'Email Address',
-  phone: 'Phone Number',
-  participants: 'Number of Participants',
-  trainingDate: 'Preferred Training Date',
-  requirements: 'Message / Requirements',
+  fullName: 'Full name',
+  company: 'Company / organisation',
+  email: 'Email address',
+  phone: 'Phone number',
+  participants: 'Number of participants',
+  trainingDate: 'Preferred training date',
+  requirements: 'Training requirements',
 };
 
 export default function BookDemoModal() {
@@ -38,12 +35,6 @@ export default function BookDemoModal() {
   const [errors, setErrors] = useState({});
 
   const minDate = useMemo(() => new Date().toISOString().split('T')[0], []);
-  const convex = useMemo(() => {
-    const url = process.env.NEXT_PUBLIC_CONVEX_URL;
-    return url ? new ConvexHttpClient(url) : null;
-  }, []);
-
-  const closing = STORY_SECTIONS.at(-1);
 
   const openModal = (trigger) => {
     window.clearTimeout(closeTimerRef.current);
@@ -60,7 +51,7 @@ export default function BookDemoModal() {
       setIsSubmitting(false);
       setSubmitError('');
       setErrors({});
-      triggerRef.current?.focus?.();
+      requestAnimationFrame(() => triggerRef.current?.focus?.());
     }, 280);
   };
 
@@ -119,6 +110,9 @@ export default function BookDemoModal() {
     if (!isRendered) return undefined;
 
     const html = document.documentElement;
+    const site = document.querySelector('.fx-site');
+    const previousInert = site?.inert;
+    if (site) site.inert = true;
     const previousOverflow = document.body.style.overflow;
     const previousHtmlOverflow = html.style.overflow;
 
@@ -126,6 +120,7 @@ export default function BookDemoModal() {
     html.style.overflow = 'hidden';
 
     return () => {
+      if (site) site.inert = previousInert;
       html.style.overflow = previousHtmlOverflow;
       document.body.style.overflow = previousOverflow;
     };
@@ -175,12 +170,23 @@ export default function BookDemoModal() {
     setSubmitSuccess(false);
     setSubmitError('');
 
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      requestAnimationFrame(() =>
+        panelRef.current?.querySelector('[aria-invalid="true"]')?.focus(),
+      );
+      return;
+    }
 
     setIsSubmitting(true);
 
     try {
-      if (!convex) throw new Error('BOOKING_SERVICE_UNAVAILABLE');
+      const url = process.env.NEXT_PUBLIC_CONVEX_URL;
+      if (!url) throw new Error('BOOKING_SERVICE_UNAVAILABLE');
+      const [{ ConvexHttpClient }, { api }] = await Promise.all([
+        import('convex/browser'),
+        import('@/convex/_generated/api'),
+      ]);
+      const convex = new ConvexHttpClient(url);
       await convex.mutation(api.demoRequests.create, {
         fullName: form.fullName.trim(),
         company: form.company.trim(),
@@ -195,7 +201,9 @@ export default function BookDemoModal() {
       setForm(INITIAL_FORM);
       setErrors({});
     } catch (_) {
-      setSubmitError('We could not send your request. Please try again or email hello@firesafex.ai.');
+      setSubmitError(
+        'We could not send your request. Please try again or email hello@firesafex.ai.',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -213,129 +221,189 @@ export default function BookDemoModal() {
         if (event.target === event.currentTarget) closeModal();
       }}
     >
-      <div className="book-demo-modal__backdrop" aria-hidden="true" onMouseDown={closeModal}></div>
+      <div
+        className="book-demo-modal__backdrop"
+        aria-hidden="true"
+        onMouseDown={closeModal}
+      ></div>
       <div
         className="book-demo-modal__panel"
         ref={panelRef}
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <button type="button" className="book-demo-modal__close" onClick={closeModal} aria-label="Close booking form">
+        <button
+          type="button"
+          className="book-demo-modal__close"
+          onClick={closeModal}
+          aria-label="Close booking form"
+        >
           <span></span>
           <span></span>
         </button>
 
         <div className="book-demo-modal__intro">
-          <p className="eyebrow">{STORY_META.cta}</p>
-          <h2 id="book-demo-title">{closing.title}</h2>
-          <p>{closing.subtitle}</p>
-          <p>{closing.body}</p>
+          <p className="book-demo-modal__label">Book a live demo</p>
+          <h2 id="book-demo-title">Let’s plan your live demo.</h2>
+          <p>Bring FireSafeX to your workplace. Tell us about your team and we’ll help you explore the training experience.</p>
+          <small>All fields are required.</small>
         </div>
 
-        <form className="book-demo-modal__form" noValidate onSubmit={handleSubmit}>
+        <form
+          className="book-demo-modal__form"
+          noValidate
+          onSubmit={handleSubmit}
+        >
           <label className="book-demo-modal__field">
-            <span>Full Name</span>
+            <span>Full name</span>
             <input
               type="text"
               name="fullName"
+              autoComplete="name"
               value={form.fullName}
               onChange={handleChange}
               placeholder="Enter your full name"
               aria-invalid={Boolean(errors.fullName)}
+              aria-describedby={
+                errors.fullName ? 'demo-fullName-error' : undefined
+              }
             />
-            {errors.fullName ? <small>{errors.fullName}</small> : null}
+            {errors.fullName ? (
+              <small id="demo-fullName-error">{errors.fullName}</small>
+            ) : null}
           </label>
 
           <label className="book-demo-modal__field">
-            <span>Company / Organization Name</span>
+            <span>Company / organisation</span>
             <input
               type="text"
               name="company"
+              autoComplete="organization"
               value={form.company}
               onChange={handleChange}
               placeholder="Enter your company or organization"
               aria-invalid={Boolean(errors.company)}
+              aria-describedby={
+                errors.company ? 'demo-company-error' : undefined
+              }
             />
-            {errors.company ? <small>{errors.company}</small> : null}
+            {errors.company ? (
+              <small id="demo-company-error">{errors.company}</small>
+            ) : null}
           </label>
 
           <label className="book-demo-modal__field">
-            <span>Email Address</span>
+            <span>Email address</span>
             <input
               type="email"
+              spellCheck={false}
               name="email"
+              autoComplete="email"
               value={form.email}
               onChange={handleChange}
               placeholder="Enter your email address"
               aria-invalid={Boolean(errors.email)}
+              aria-describedby={errors.email ? 'demo-email-error' : undefined}
             />
-            {errors.email ? <small>{errors.email}</small> : null}
+            {errors.email ? (
+              <small id="demo-email-error">{errors.email}</small>
+            ) : null}
           </label>
 
           <label className="book-demo-modal__field">
-            <span>Phone Number</span>
+            <span>Phone number</span>
             <input
               type="tel"
               name="phone"
+              autoComplete="tel"
               value={form.phone}
               onChange={handleChange}
               placeholder="Enter your phone number"
               aria-invalid={Boolean(errors.phone)}
+              aria-describedby={errors.phone ? 'demo-phone-error' : undefined}
             />
-            {errors.phone ? <small>{errors.phone}</small> : null}
+            {errors.phone ? (
+              <small id="demo-phone-error">{errors.phone}</small>
+            ) : null}
           </label>
 
           <label className="book-demo-modal__field">
-            <span>Number of Participants</span>
+            <span>Number of participants</span>
             <input
               type="number"
               name="participants"
+              inputMode="numeric"
+              autoComplete="off"
               min="1"
               value={form.participants}
               onChange={handleChange}
               placeholder="Enter expected participants"
               aria-invalid={Boolean(errors.participants)}
+              aria-describedby={
+                errors.participants ? 'demo-participants-error' : undefined
+              }
             />
-            {errors.participants ? <small>{errors.participants}</small> : null}
+            {errors.participants ? (
+              <small id="demo-participants-error">{errors.participants}</small>
+            ) : null}
           </label>
 
           <label className="book-demo-modal__field">
-            <span>Preferred Training Date</span>
+            <span>Preferred training date</span>
             <input
               type="date"
               name="trainingDate"
+              autoComplete="off"
               min={minDate}
               value={form.trainingDate}
               onChange={handleChange}
               aria-invalid={Boolean(errors.trainingDate)}
+              aria-describedby={
+                errors.trainingDate ? 'demo-trainingDate-error' : undefined
+              }
             />
-            {errors.trainingDate ? <small>{errors.trainingDate}</small> : null}
+            {errors.trainingDate ? (
+              <small id="demo-trainingDate-error">{errors.trainingDate}</small>
+            ) : null}
           </label>
 
           <label className="book-demo-modal__field book-demo-modal__field--full">
-            <span>Message / Requirements</span>
+            <span>Training requirements</span>
             <textarea
               name="requirements"
-              rows="5"
+              autoComplete="off"
+              rows="3"
               value={form.requirements}
               onChange={handleChange}
               placeholder="Tell us about your training goals, locations, or program requirements"
               aria-invalid={Boolean(errors.requirements)}
+              aria-describedby={
+                errors.requirements ? 'demo-requirements-error' : undefined
+              }
             ></textarea>
-            {errors.requirements ? <small>{errors.requirements}</small> : null}
+            {errors.requirements ? (
+              <small id="demo-requirements-error">{errors.requirements}</small>
+            ) : null}
           </label>
 
           <div className="book-demo-modal__footer book-demo-modal__field--full">
             <div className="book-demo-modal__status" aria-live="polite">
               {submitSuccess ? (
                 <p className="book-demo-modal__status-success">
-                  Your demo request has been sent. Our team will contact you shortly.
+                  Your demo request has been sent. Our team will contact you
+                  shortly.
                 </p>
               ) : null}
-              {submitError ? <p className="book-demo-modal__status-error">{submitError}</p> : null}
+              {submitError ? (
+                <p className="book-demo-modal__status-error">{submitError}</p>
+              ) : null}
             </div>
 
-            <button type="submit" className="btn btn--blue" disabled={isSubmitting}>
-              {isSubmitting ? 'Sending Request...' : closing.cta}
+            <button
+              type="submit"
+              className="fx-button"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Sending request…' : 'Book a live demo'}
             </button>
           </div>
         </form>

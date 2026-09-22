@@ -160,7 +160,7 @@ definitions:
 
     - step: &validate_node
         name: Validate Dependency Versions
-        image: node:18
+        image: node:22
         script:
           - node validate-deps.js
 
@@ -189,8 +189,13 @@ definitions:
           - export AWS_ROLE_ARN=$AWS_S3_OIDC_ROLE_ARN
           - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token
           - echo $BITBUCKET_STEP_OIDC_TOKEN > $AWS_WEB_IDENTITY_TOKEN_FILE
-          - npm install
+          - node scripts/check-production-env.mjs
+          - npm ci --engine-strict
+          - npm audit --omit=dev --audit-level=high
+          - npm run test:booking
           - npm run build
+          - npm run audit:production
+          - npm run validate:content
 
           - aws s3 sync out/. "s3://$S3_BUCKET" --region "$AWS_DEFAULT_REGION"
           - aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "/*"

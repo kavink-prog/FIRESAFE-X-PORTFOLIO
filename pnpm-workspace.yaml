@@ -1,3 +1,9 @@
 allowBuilds:
   esbuild: true
   sharp: true
+minimumReleaseAgeExclude:
+  - convex@1.46.0
+
+overrides:
+  postcss: 8.5.28
+  nanoid: 3.3.19

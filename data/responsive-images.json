@@ -1,0 +1,92 @@
+{
+  "/assets/images/brochure-web/workplaces.webp": {
+    "srcSet": "/assets/images/brochure-web/workplaces-768.webp 768w, /assets/images/brochure-web/workplaces.webp 1000w",
+    "width": 1000,
+    "height": 667
+  },
+  "/assets/images/enhanced-real/configure.webp": {
+    "srcSet": "/assets/images/enhanced-real/configure-768.webp 768w, /assets/images/enhanced-real/configure.webp 1448w",
+    "width": 1448,
+    "height": 1086
+  },
+  "/assets/images/enhanced-real/deploy-equipment.webp": {
+    "srcSet": "/assets/images/enhanced-real/deploy-equipment-768.webp 768w, /assets/images/enhanced-real/deploy-equipment.webp 1536w",
+    "width": 1536,
+    "height": 1024
+  },
+  "/assets/images/enhanced-real/track.webp": {
+    "srcSet": "/assets/images/enhanced-real/track-768.webp 768w, /assets/images/enhanced-real/track.webp 1448w",
+    "width": 1448,
+    "height": 1086
+  },
+  "/assets/images/enhanced-real/traditional.webp": {
+    "srcSet": "/assets/images/enhanced-real/traditional-768.webp 768w, /assets/images/enhanced-real/traditional.webp 1448w",
+    "width": 1448,
+    "height": 1086
+  },
+  "/assets/images/events/event-10.webp": {
+    "srcSet": "/assets/images/events/event-10-768.webp 768w, /assets/images/events/event-10.webp 1800w",
+    "width": 1800,
+    "height": 1350
+  },
+  "/assets/images/firesafe-x_eco-system/firesafex-01-device-connection.webp": {
+    "srcSet": "/assets/images/firesafe-x_eco-system/firesafex-01-device-connection-768.webp 768w, /assets/images/firesafe-x_eco-system/firesafex-01-device-connection.webp 1536w",
+    "width": 1536,
+    "height": 1024
+  },
+  "/assets/images/firesafe-x_eco-system/firesafex-02-device-connected.webp": {
+    "srcSet": "/assets/images/firesafe-x_eco-system/firesafex-02-device-connected-768.webp 768w, /assets/images/firesafe-x_eco-system/firesafex-02-device-connected.webp 1536w",
+    "width": 1536,
+    "height": 1024
+  },
+  "/assets/images/firesafe-x_eco-system/firesafex-04-training-instructions.webp": {
+    "srcSet": "/assets/images/firesafe-x_eco-system/firesafex-04-training-instructions-768.webp 768w, /assets/images/firesafe-x_eco-system/firesafex-04-training-instructions.webp 1619w",
+    "width": 1619,
+    "height": 971
+  },
+  "/assets/images/firesafe-x_eco-system/firesafex-05-live-fire-simulation.webp": {
+    "srcSet": "/assets/images/firesafe-x_eco-system/firesafex-05-live-fire-simulation-768.webp 768w, /assets/images/firesafe-x_eco-system/firesafex-05-live-fire-simulation.webp 1586w",
+    "width": 1586,
+    "height": 992
+  },
+  "/assets/images/firesafe-x_eco-system/firesafex-06-training-performance-results.webp": {
+    "srcSet": "/assets/images/firesafe-x_eco-system/firesafex-06-training-performance-results-768.webp 768w, /assets/images/firesafe-x_eco-system/firesafex-06-training-performance-results.webp 1586w",
+    "width": 1586,
+    "height": 992
+  },
+  "/assets/images/firesafe-x_eco-system/firesafex-07-achievement-certificate.webp": {
+    "srcSet": "/assets/images/firesafe-x_eco-system/firesafex-07-achievement-certificate-768.webp 768w, /assets/images/firesafe-x_eco-system/firesafex-07-achievement-certificate.webp 1672w",
+    "width": 1672,
+    "height": 941
+  },
+  "/assets/images/firesafe-x_eco-system/firesafex-08-ask-the-expert-intro.webp": {
+    "srcSet": "/assets/images/firesafe-x_eco-system/firesafex-08-ask-the-expert-intro-768.webp 768w, /assets/images/firesafe-x_eco-system/firesafex-08-ask-the-expert-intro.webp 1586w",
+    "width": 1586,
+    "height": 992
+  },
+  "/assets/images/firesafe-x_eco-system/firesafex-09-training-module-menu.webp": {
+    "srcSet": "/assets/images/firesafe-x_eco-system/firesafex-09-training-module-menu-768.webp 768w, /assets/images/firesafe-x_eco-system/firesafex-09-training-module-menu.webp 1586w",
+    "width": 1586,
+    "height": 992
+  },
+  "/assets/images/firesafe-x_eco-system/firesafex-12-ai-expert-avatar.webp": {
+    "srcSet": "/assets/images/firesafe-x_eco-system/firesafex-12-ai-expert-avatar-768.webp 768w, /assets/images/firesafe-x_eco-system/firesafex-12-ai-expert-avatar.webp 1586w",
+    "width": 1586,
+    "height": 992
+  },
+  "/assets/images/firesafe-x_outerpov/firesafex-outdoor-mixed-reality-training.webp": {
+    "srcSet": "/assets/images/firesafe-x_outerpov/firesafex-outdoor-mixed-reality-training-768.webp 768w, /assets/images/firesafe-x_outerpov/firesafex-outdoor-mixed-reality-training.webp 1536w",
+    "width": 1536,
+    "height": 1024
+  },
+  "/assets/images/hero/firesafex-industrial-training.webp": {
+    "srcSet": "/assets/images/hero/firesafex-industrial-training-768.webp 768w, /assets/images/hero/firesafex-industrial-training.webp 1536w",
+    "width": 1536,
+    "height": 1024
+  },
+  "/assets/images/stock/vr-headset-controllers.webp": {
+    "srcSet": "/assets/images/stock/vr-headset-controllers-768.webp 768w, /assets/images/stock/vr-headset-controllers.webp 1440w",
+    "width": 1440,
+    "height": 960
+  }
+}

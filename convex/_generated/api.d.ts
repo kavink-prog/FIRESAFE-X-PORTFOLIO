@@ -8,7 +8,10 @@
  * @module
  */
 
+import type * as demoRequests from "../demoRequests.js";
 import type * as files from "../files.js";
+import type * as googleSheets from "../googleSheets.js";
+import type * as validateDemoRequest from "../validateDemoRequest.js";
 
 import type {
   ApiFromModules,
@@ -17,7 +20,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  demoRequests: typeof demoRequests;
   files: typeof files;
+  googleSheets: typeof googleSheets;
+  validateDemoRequest: typeof validateDemoRequest;
 }>;
 
 /**

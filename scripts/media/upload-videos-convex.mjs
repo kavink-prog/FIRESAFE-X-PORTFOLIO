@@ -39,6 +39,9 @@ if (!url) {
   process.exit(1);
 }
 
+// This secret is only for a trusted operator, never a NEXT_PUBLIC variable.
+const adminToken = process.env.MEDIA_UPLOAD_ADMIN_TOKEN;
+if (!adminToken) throw new Error('Set MEDIA_UPLOAD_ADMIN_TOKEN locally and in the Convex deployment.');
 const client = new ConvexHttpClient(url);
 const generateUploadUrl = makeFunctionReference('files:generateUploadUrl');
 const getUrl = makeFunctionReference('files:getUrl');
@@ -61,7 +64,7 @@ for (const folder of FOLDERS) {
 
   for (const file of files) {
     const bytes = await readFile(join(dir, file));
-    const postUrl = await client.mutation(generateUploadUrl, {});
+    const postUrl = await client.mutation(generateUploadUrl, { adminToken });
     const res = await fetch(postUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'video/mp4' },

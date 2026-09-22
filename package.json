@@ -9,19 +9,24 @@
     "start": "next start",
     "lint": "next lint",
     "validate:content": "node scripts/validate-site-content.mjs",
-    "optimize:hero": "node scripts/media/optimize-hero-sequence.mjs"
+    "optimize:hero": "node scripts/media/optimize-hero-sequence.mjs",
+    "audit:production": "node scripts/audit-production.mjs",
+    "test:booking": "node --test scripts/validate-demo-request.test.mjs scripts/google-sheets.test.mjs"
   },
   "dependencies": {
-    "convex": "1.40.0",
-    "framer-motion": "12.40.0",
-    "gsap": "3.12.5",
-    "lenis": "1.1.18",
-    "next": "15.1.6",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
-    "three": "0.160.0"
+    "convex": "1.46.0",
+    "next": "15.5.25",
+    "react": "19.0.8",
+    "react-dom": "19.0.8"
   },
   "devDependencies": {
-    "sharp": "0.35.2"
+    "sharp": "0.35.4"
+  },
+  "overrides": {
+    "postcss": "8.5.28",
+    "nanoid": "3.3.19"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   }
 }
