@@ -180,12 +180,11 @@ definitions:
         caches:
           - node
         name: Deploy to S3 Bucket
-        image:
-          name: 010928215705.dkr.ecr.ap-south-1.amazonaws.com/mako-ecr-pipeline-staging:v4
-          aws:
-            oidc-role: $AWS_S3_OIDC_ROLE_ARN
+        image: node:22-bookworm
         oidc: true
         script:
+          - apt-get update && apt-get install -y --no-install-recommends awscli curl
+          - node --version && aws --version
           - export AWS_ROLE_ARN=$AWS_S3_OIDC_ROLE_ARN
           - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token
           - echo $BITBUCKET_STEP_OIDC_TOKEN > $AWS_WEB_IDENTITY_TOKEN_FILE
