@@ -18,20 +18,20 @@ const steps = [
   {
     title: 'Practise',
     copy: 'Enter realistic emergency scenarios. Handle smart physical equipment and get guidance from the AI assistant.',
-    image: 'firesafex-05-live-fire-simulation',
-    width: 1586,
-    height: 992,
-    caption:
-      'Simulated fire in a physical environment, viewed through the headset.',
-  },
-  {
-    title: 'Assess',
-    copy: 'Measure knowledge and practical performance with structured digital assessments.',
     image: 'firesafex-04-training-instructions',
     width: 1619,
     height: 971,
     caption:
       'Review the on-screen instructions before beginning a practical assessment.',
+  },
+  {
+    title: 'Assess',
+    copy: 'Measure knowledge and practical performance with structured digital assessments.',
+    image: 'firesafex-05-live-fire-simulation',
+    width: 1586,
+    height: 992,
+    caption:
+      'Simulated fire in a physical environment, viewed through the headset.',
   },
   {
     title: 'Certify',
@@ -44,11 +44,11 @@ const steps = [
   {
     title: 'Track',
     copy: 'Monitor participation, completion and employee readiness in organised digital records.',
-    image: '/assets/images/enhanced-real/track.webp',
-    width: 1448,
-    height: 1086,
+    image: '/assets/images/firesafe-x_eco-system/firesafex-13-track.png',
+    width: 1586,
+    height: 992,
     caption:
-      'An instructor monitors a live training session on a laptop. AI-enhanced event photograph.',
+      'FireSafeX assessment history dashboard showing scores, attempt history and criteria results.',
   },
   {
     title: 'Improve',
@@ -61,7 +61,9 @@ const steps = [
 ];
 export default function TrainingExplorer() {
   const [active, setActive] = useState(1);
+  const [loadedImage, setLoadedImage] = useState('');
   const step = steps[active];
+  const isImageLoaded = loadedImage === step.image;
   useEffect(() => {
     function restoreStep() {
       const requested = new URLSearchParams(window.location.search).get('training');
@@ -132,14 +134,24 @@ export default function TrainingExplorer() {
           <span>Inside FireSafeX</span>
           <span>{step.title}</span>
         </div>
-        <ResponsiveImage
-          key={step.image}
-          src={step.image.startsWith('/') ? step.image : `${root}${step.image}.webp`}
-          alt={step.caption}
-          width={step.width}
-          height={step.height}
-          loading="lazy"
-        />
+        <div
+          className={`fx-screen-media ${isImageLoaded ? 'is-loaded' : 'is-loading'}`}
+          style={{ aspectRatio: `${step.width} / ${step.height}` }}
+        >
+          <div className="fx-screen-placeholder" aria-hidden="true"></div>
+          <ResponsiveImage
+            key={step.image}
+            src={step.image.startsWith('/') ? step.image : `${root}${step.image}.webp`}
+            alt={step.caption}
+            width={step.width}
+            height={step.height}
+            loading="lazy"
+            onLoad={() => setLoadedImage(step.image)}
+          />
+          <span className="fx-screen-loading" role="status" aria-live="polite">
+            {isImageLoaded ? '' : 'Loading training view…'}
+          </span>
+        </div>
         <div className="fx-screen-description" aria-live="polite">
           <h3>{step.title} with FireSafeX</h3>
           <p>{step.copy}</p>

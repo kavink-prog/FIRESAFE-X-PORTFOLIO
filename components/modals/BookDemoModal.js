@@ -22,6 +22,65 @@ const REQUIRED_LABELS = {
   requirements: 'Training requirements',
 };
 
+const FIELD_LIMITS = {
+  fullName: 120,
+  company: 200,
+  email: 254,
+  phone: 40,
+  requirements: 4000,
+};
+
+function getLocalDate() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function validateField(name, value, minDate) {
+  const text = String(value).trim();
+  if (!text) return `${REQUIRED_LABELS[name]} is required.`;
+
+  if (FIELD_LIMITS[name] && text.length > FIELD_LIMITS[name]) {
+    return `${REQUIRED_LABELS[name]} must be ${FIELD_LIMITS[name]} characters or fewer.`;
+  }
+
+  if (name === 'fullName' && !/[\p{L}\p{N}]/u.test(text)) {
+    return 'Enter a valid full name.';
+  }
+  if (name === 'company' && !/[\p{L}\p{N}]/u.test(text)) {
+    return 'Enter a valid company or organisation.';
+  }
+  if (name === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text)) {
+    return 'Enter a valid email address.';
+  }
+  if (name === 'phone') {
+    const digits = text.replace(/\D/g, '');
+    if (!/^[+\d().\-\s]+$/.test(text) || digits.length < 8 || digits.length > 15) {
+      return 'Enter a valid phone number with 8 to 15 digits.';
+    }
+  }
+  if (name === 'participants') {
+    if (!/^\d+$/.test(text) || Number(text) < 1 || Number(text) > 100000) {
+      return 'Participants must be a whole number between 1 and 100,000.';
+    }
+  }
+  if (name === 'trainingDate') {
+    const date = new Date(`${text}T00:00:00Z`);
+    if (
+      !/^\d{4}-\d{2}-\d{2}$/.test(text) ||
+      !Number.isFinite(date.getTime()) ||
+      date.toISOString().slice(0, 10) !== text
+    ) {
+      return 'Enter a valid training date.';
+    }
+    if (text < minDate) return 'Training date cannot be in the past.';
+  }
+
+  return '';
+}
+
 export default function BookDemoModal() {
   const closeTimerRef = useRef(null);
   const panelRef = useRef(null);
@@ -34,7 +93,7 @@ export default function BookDemoModal() {
   const [form, setForm] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
 
-  const minDate = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const minDate = useMemo(getLocalDate, []);
 
   const openModal = (trigger) => {
     window.clearTimeout(closeTimerRef.current);
@@ -129,24 +188,10 @@ export default function BookDemoModal() {
   const validateForm = () => {
     const nextErrors = {};
 
-    Object.entries(REQUIRED_LABELS).forEach(([key, label]) => {
-      if (!String(form[key]).trim()) {
-        nextErrors[key] = `${label} is required.`;
-      }
+    Object.keys(REQUIRED_LABELS).forEach((key) => {
+      const error = validateField(key, form[key], minDate);
+      if (error) nextErrors[key] = error;
     });
-
-    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      nextErrors.email = 'Enter a valid email address.';
-    }
-
-    const digits = form.phone.replace(/\D/g, '');
-    if (form.phone && digits.length < 8) {
-      nextErrors.phone = 'Enter a valid phone number.';
-    }
-
-    if (form.participants && Number(form.participants) < 1) {
-      nextErrors.participants = 'Participants must be at least 1.';
-    }
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -163,6 +208,17 @@ export default function BookDemoModal() {
       return next;
     });
     setSubmitError('');
+  };
+
+  const handleBlur = (event) => {
+    const { name, value } = event.target;
+    const error = validateField(name, value, minDate);
+    setErrors((current) => {
+      const next = { ...current };
+      if (error) next[name] = error;
+      else delete next[name];
+      return next;
+    });
   };
 
   const handleSubmit = async (event) => {
@@ -259,8 +315,11 @@ export default function BookDemoModal() {
               type="text"
               name="fullName"
               autoComplete="name"
+              required
+              maxLength={FIELD_LIMITS.fullName}
               value={form.fullName}
               onChange={handleChange}
+              onBlur={handleBlur}
               placeholder="Enter your full name"
               aria-invalid={Boolean(errors.fullName)}
               aria-describedby={
@@ -278,8 +337,11 @@ export default function BookDemoModal() {
               type="text"
               name="company"
               autoComplete="organization"
+              required
+              maxLength={FIELD_LIMITS.company}
               value={form.company}
               onChange={handleChange}
+              onBlur={handleBlur}
               placeholder="Enter your company or organization"
               aria-invalid={Boolean(errors.company)}
               aria-describedby={
@@ -298,8 +360,11 @@ export default function BookDemoModal() {
               spellCheck={false}
               name="email"
               autoComplete="email"
+              required
+              maxLength={FIELD_LIMITS.email}
               value={form.email}
               onChange={handleChange}
+              onBlur={handleBlur}
               placeholder="Enter your email address"
               aria-invalid={Boolean(errors.email)}
               aria-describedby={errors.email ? 'demo-email-error' : undefined}
@@ -315,8 +380,11 @@ export default function BookDemoModal() {
               type="tel"
               name="phone"
               autoComplete="tel"
+              required
+              maxLength={FIELD_LIMITS.phone}
               value={form.phone}
               onChange={handleChange}
+              onBlur={handleBlur}
               placeholder="Enter your phone number"
               aria-invalid={Boolean(errors.phone)}
               aria-describedby={errors.phone ? 'demo-phone-error' : undefined}
@@ -333,9 +401,13 @@ export default function BookDemoModal() {
               name="participants"
               inputMode="numeric"
               autoComplete="off"
+              required
               min="1"
+              max="100000"
+              step="1"
               value={form.participants}
               onChange={handleChange}
+              onBlur={handleBlur}
               placeholder="Enter expected participants"
               aria-invalid={Boolean(errors.participants)}
               aria-describedby={
@@ -353,9 +425,11 @@ export default function BookDemoModal() {
               type="date"
               name="trainingDate"
               autoComplete="off"
+              required
               min={minDate}
               value={form.trainingDate}
               onChange={handleChange}
+              onBlur={handleBlur}
               aria-invalid={Boolean(errors.trainingDate)}
               aria-describedby={
                 errors.trainingDate ? 'demo-trainingDate-error' : undefined
@@ -371,9 +445,12 @@ export default function BookDemoModal() {
             <textarea
               name="requirements"
               autoComplete="off"
+              required
+              maxLength={FIELD_LIMITS.requirements}
               rows="3"
               value={form.requirements}
               onChange={handleChange}
+              onBlur={handleBlur}
               placeholder="Tell us about your training goals, locations, or program requirements"
               aria-invalid={Boolean(errors.requirements)}
               aria-describedby={

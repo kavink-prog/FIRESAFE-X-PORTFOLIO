@@ -53,9 +53,6 @@ function BenefitIcon({ type }) {
   };
   return <svg className="fx-benefit-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[type]}</svg>;
 }
-function Arrow() {
-  return <span aria-hidden="true">↗</span>;
-}
 function DemoButton({ children = 'Book a live demo', light = false }) {
   return (
     <button
@@ -64,7 +61,6 @@ function DemoButton({ children = 'Book a live demo', light = false }) {
       data-book-demo
     >
       {children}
-      <Arrow />
     </button>
   );
 }
@@ -79,7 +75,7 @@ export default function BrochurePage() {
         <nav aria-label="Main navigation">
           <a href="#experience">The experience</a>
           <a href="#platform">The platform</a>
-          <a href="#multilingual">Languages</a>
+          <a href="#capabilities">Capabilities</a>
           <a href="#workplaces">For your team</a>
         </nav>
         <DemoButton />
@@ -103,14 +99,13 @@ export default function BrochurePage() {
             <a className="fx-hero-languages" href="#multilingual">
               <span className="fx-language-mark" aria-hidden="true">Aa<span lang="ta">அ</span></span>
               <span><strong> IMMERSIVE · ITELLIGENT · MEASURABLE </strong><small>Multilingual learning, with AI guidance.</small></span>
-              <span aria-hidden="true">↗</span>
             </a>
           <div className="fx-benefits">
             <div>
               <BenefitIcon type="immersive" />
               <p>
-                <strong>Immersive by design</strong>
-                <span>Realistic decisions. Safe practice.</span>
+                <strong>Set up in one day</strong>
+                <span>We complete setup at your workplace within one day.</span>
               </p>
             </div>
             <div>
@@ -239,7 +234,7 @@ export default function BrochurePage() {
             </section>
           </div>
         </section>
-        <section className="fx-platform fx-capabilities" aria-labelledby="capabilities-title">
+        <section className="fx-platform fx-capabilities" id="capabilities" aria-labelledby="capabilities-title">
           <div className="fx-wrap">
             <div className="fx-section-heading">
               <h2 id="capabilities-title">Everything connected.<br />Every session counts.</h2>
@@ -377,7 +372,6 @@ export default function BrochurePage() {
         <div className="fx-footer-bottom">
           <span>© 2026 FireSafeX. All rights reserved.</span>
           <a href="#home">Back to top ↑</a>
-          <span>Powered by ImmersiveX Innovation</span>
         </div>
       </footer>
     </div>

@@ -456,13 +456,49 @@ td {
   padding: 13px 22px;
   font-size: 14px;
 }
-.fx-explorer-panel > img {
+.fx-screen-media {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  background: #101b25;
+}
+.fx-screen-media > img {
   display: block;
   width: 100%;
-  aspect-ratio: 16/9;
-  height: auto;
+  height: 100%;
   object-fit: contain;
   background: #101b25;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+.fx-screen-media.is-loaded > img {
+  opacity: 1;
+}
+.fx-screen-placeholder {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, #172d40 20%, #24435a 38%, #172d40 56%);
+  background-size: 220% 100%;
+  animation: fx-screen-loading 1.2s ease-in-out infinite;
+}
+.fx-screen-media.is-loaded .fx-screen-placeholder {
+  display: none;
+}
+.fx-screen-loading {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  color: #d5e1ea;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.fx-screen-media.is-loaded .fx-screen-loading {
+  display: none;
+}
+@keyframes fx-screen-loading {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
 }
 .fx-screen-description {
   padding: 25px 30px 30px;

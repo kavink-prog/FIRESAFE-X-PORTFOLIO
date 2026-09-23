@@ -30,7 +30,6 @@
 .fx-hero .fx-hero-languages { grid-area:2/1; display:flex; align-items:center; gap:24px; margin:0; padding:25px max(var(--fx-gutter), calc((100% - var(--fx-content)) / 2)); color:#142638; background:#fff0e8; border:0; }
 .fx-hero-languages strong { display:block; font-size:23px; font-weight:600; }
 .fx-hero-languages small { display:block; color:#536779; font-size:15px; margin-top:2px; }
-.fx-hero-languages > span:last-child { margin-left:auto; font-size:30px; }
 .fx-language-mark { display:flex; align-items:center; gap:4px; font-size:38px; color:#b43513; font-family:var(--font-display),sans-serif; }
 .fx-language-mark span { font-size:28px; }
 .fx-hero-languages:hover strong { text-decoration:underline; text-underline-offset:5px; }
